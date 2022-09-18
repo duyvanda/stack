@@ -1,0 +1,2 @@
+def autodetect():
+    return None
