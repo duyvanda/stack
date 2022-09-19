@@ -23,7 +23,7 @@ dag_params = {
     'email_on_retry': False,
     'email':['duyvq@merapgroup.com', 'vanquangduy10@gmail.com'],
     'do_xcom_push': False,
-    'execution_timeout':timedelta(seconds=300)
+    'execution_timeout':timedelta(seconds=600)
     # 'retries': 3,
     # 'retry_delay': timedelta(minutes=10),
 }
