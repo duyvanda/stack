@@ -138,9 +138,9 @@ call_bq_ps = PythonOperator(task_id="call_bq_ps", python_callable=call_bq_ps, da
 
 # hello_task4 = ToCSVMsSqlOperator(task_id='sample-task-4', mssql_conn_id="1_dms_conn_id", sql=sql, database="PhaNam_eSales_PRO", path=path, dag=dag)
 
-tab_refresh = TableauOperator(task_id='tab_refresh', resource='datasources', method='refresh', find='biteam_daily', match_with='name', dag=dag)
+# tab_refresh = TableauOperator(task_id='tab_refresh', resource='datasources', method='refresh', find='biteam_daily', match_with='name', dag=dag)
 
 
-dummy_start >> extract_dms >> py_etl_to_postgres >> [call_bq_ps,tab_refresh]
+dummy_start >> extract_dms >> py_etl_to_postgres >> [call_bq_ps]
 # 
 # >> tab_refresh
