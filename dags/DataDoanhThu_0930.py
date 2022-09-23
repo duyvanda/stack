@@ -19,9 +19,9 @@ dag_params = {
     'owner': 'airflow',
     "depends_on_past": False,
     'start_date': datetime(2021, 10, 1, tzinfo=local_tz),
-    'email_on_failure': True,
-    'email_on_retry': False,
-    'email':['duyvq@merapgroup.com', 'vanquangduy10@gmail.com'],
+    # 'email_on_failure': True,
+    # 'email_on_retry': False,
+    # 'email':['duyvq@merapgroup.com', 'vanquangduy10@gmail.com'],
     'do_xcom_push': False,
     'execution_timeout':timedelta(seconds=600)
     # 'retries': 3,
