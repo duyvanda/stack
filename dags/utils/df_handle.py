@@ -16,7 +16,7 @@ from google.cloud import bigquery
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/usr/local/airflow/dags/files/bigquery1508.json"
 pjt = 'spatial-vision-343005'
 dts = '.biteam'
-# print("Default bq project: ",pjt+dts)
+# print("DDefault bq project: ",pjt+dts)
 
 def bq_values_insert(df, table:str, option:int, schema=None, reauth=True) -> None:
     '''
