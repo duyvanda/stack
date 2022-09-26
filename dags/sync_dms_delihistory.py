@@ -124,7 +124,7 @@ def update_sync_dms():
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
-insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
+update = PythonOperator(task_id="update", python_callable=update, dag=dag)
 
 handle_deleted_data = PythonOperator(task_id="handle_deleted_data", python_callable=handle_deleted_data, dag=dag)
 
