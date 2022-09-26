@@ -144,6 +144,11 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+bigquery1508.json
+bigquery2609.json
+datateam1599968716114-6f9f144b4262.json
+spatial-vision-343005-340470c8d77b.json
+
 
 # Pyre type checker
 .pyre/
