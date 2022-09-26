@@ -57,7 +57,7 @@ LEFT JOIN OM_ReasonCodePPC b
 on a.Reason =  b.Code
 and b.Code <> '' and b.Type in('DELIOUTLET','DELIREJ','RENOTDEBT')
 WHERE a.Status in ('A','D')
-and cast(LUpd_DateTime as DATE) >= @from
+and cast(a.LUpd_DateTime as DATE) >= @from
 and cast(a.Crtd_DateTime as DATE) >= @to
 """
 
