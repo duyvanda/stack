@@ -13,7 +13,7 @@ import psycopg2.extras as extras
 from psycopg2 import OperationalError, errorcodes, errors
 from google.cloud import bigquery
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get("GC_SERVICE_FILE")
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "https://storage.googleapis.com/django_bucket_biteam/bigquery2609.json"
 pjt = 'spatial-vision-343005'
 dts = '.biteam'
 # print("Default bq project: ",pjt+dts)
