@@ -99,12 +99,12 @@ def update_khsx_nhamay():
 
     tonchuanhap['ngayreview']=pd.to_datetime(tonchuanhap['ngayreview'], format="%d/%m/%Y")
     
-    datenow_1dago = datetime.now().replace(hour=23,minute=30) - timedelta(days=1)
+    #datenow_1dago = datetime.now().replace(hour=23,minute=30) - timedelta(days=1)
 
-    df1['inserted_at'] = datenow_1dago
-    tonchuanhap['inserted_at'] = datenow_1dago
-    songaynhapkho['inserted_at'] = datenow_1dago
-    quycachdh['inserted_at'] = datenow_1dago
+    df1['inserted_at'] = datetime.now()
+    tonchuanhap['inserted_at'] = datetime.now()
+    songaynhapkho['inserted_at'] = datetime.now()
+    quycachdh['inserted_at'] = datetime.now()
 
     bq_values_insert(df1,"d_nm_kehoachsanxuat",3)
     bq_values_insert(tonchuanhap,"d_nm_tonchuanhap",3)
