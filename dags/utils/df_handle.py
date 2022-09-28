@@ -534,4 +534,21 @@ def drop_cols(df, list):
     list: labels list
     """
     df.drop(labels=list, axis=1, inplace=True)
+
+def get_storage_client():
+    '''Return Storage Client'''
+    return storage.Client()
+
+def upload_file_to_bucket(blobname: str, df_tocsv_method: pd.DataFrame.to_csv, filetype='text/csv', bucketname='django_bucket_biteam'):
+    '''
+    bucketname: default is django_bucket_biteam
+    blobname: strpath example bucket.blob("admin/duy.csv")
+    df_tocsv_method: df.to_csv(index=False)
+    filetype: default is text/csv, can be 'application/json'
+    '''
+    with closing(storage.Client()) as client:
+        bucket = client.get_bucket(bucketname)
+        blob = bucket.blob(blobname)
+        blob.upload_from_string(df_tocsv_method, content_type=filetype)
+    
     
