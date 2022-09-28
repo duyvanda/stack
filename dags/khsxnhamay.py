@@ -94,11 +94,13 @@ def update_khsx_nhamay():
     df1=pd.merge(df1,df_old,how='left', on=['masanphamphanam','month'])
 
     tonchuanhap['ngayreview']=pd.to_datetime(tonchuanhap['ngayreview'], format="%d/%m/%Y")
+    
+    datenow_1dago = datetime.now().replace(hour=23,minute=30) - timedelta(days=1)
 
-    df1['inserted_at'] =datetime.now()
-    tonchuanhap['inserted_at'] =datetime.now()
-    songaynhapkho['inserted_at'] =datetime.now()
-    quycachdh['inserted_at'] =datetime.now()
+    df1['inserted_at'] = datenow_1dago
+    tonchuanhap['inserted_at'] = datenow_1dago
+    songaynhapkho['inserted_at'] = datenow_1dago
+    quycachdh['inserted_at'] = datenow_1dago
 
     bq_values_insert(df1,"d_nm_kehoachsanxuat",3)
     bq_values_insert(tonchuanhap,"d_nm_tonchuanhap",3)
