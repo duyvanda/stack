@@ -77,6 +77,10 @@ def update_khsx_nhamay():
     df= df.apply(lambda x: x.str.replace('-',''))
     df1= df[df['value'].notna()].copy()
     df1= df1[df1['value']!=''].copy()
+    #update 28092022
+    df1.value = pd.to_numeric(df1.value)
+    df1.variable = pd.to_numeric(df1.variable)
+    #endupdate
     df1[["value","variable"]]= df1[["value","variable"]].astype('int64')
     df1.rename(columns={'value':'soluong',
                         }, inplace=True)
