@@ -742,9 +742,11 @@ update_sync_dms_err = PythonOperator(task_id="update_sync_dms_err", python_calla
 
 update_sync_dms_lt = PythonOperator(task_id="update_sync_dms_lt", python_callable=update_sync_dms_lt, dag=dag)
 
+dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
+
 
 
 
 
 dummy_start >> [update_sync_dms_pda_so, update_sync_dms_so, update_sync_dms_ib, update_sync_dms_dv] >> dummy_start1
-dummy_start1 >> [update_sync_dms_pda_sod, update_sync_dms_sod, update_sync_dms_iv, update_sync_dms_err,update_sync_dms_lt]
+dummy_start1 >> [update_sync_dms_pda_sod, update_sync_dms_sod, update_sync_dms_iv, update_sync_dms_err,update_sync_dms_lt] >> dummy_end
