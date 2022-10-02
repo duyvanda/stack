@@ -93,6 +93,8 @@ def insert():
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
+dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
+
 insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
 
-dummy_start >> insert
+dummy_start >> insert >> dummy_end
