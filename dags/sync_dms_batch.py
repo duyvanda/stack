@@ -184,13 +184,15 @@ def update_sync_dms_ardoc_2():
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
+dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
+
 insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
 
 update = PythonOperator(task_id="update", python_callable=update, dag=dag)
 
 update_sync_dms_ardoc_2 = PythonOperator(task_id="update_sync_dms_ardoc_2", python_callable=update_sync_dms_ardoc_2, dag=dag)
 
-dummy_start >> update >> insert >> update_sync_dms_ardoc_2
+dummy_start >> update >> insert >> update_sync_dms_ardoc_2 dummy_end
 
 # print(table_name, table_temp, datenow_mns45)
 
