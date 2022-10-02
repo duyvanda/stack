@@ -204,4 +204,6 @@ dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
 update_customer = PythonOperator(task_id="update_customer", python_callable=update_customer, dag=dag)
 
-dummy_start >> update_customer
+dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
+
+dummy_start >> update_customer >> dummy_end
