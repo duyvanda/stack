@@ -108,6 +108,8 @@ def update():
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
+dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
+
 update = PythonOperator(task_id="update", python_callable=update, dag=dag)
 
-dummy_start >> update
+dummy_start >> update >> dummy_end
