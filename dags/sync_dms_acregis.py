@@ -135,4 +135,4 @@ insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
 
 update = PythonOperator(task_id="update", python_callable=update, dag=dag)
 
-dummy_start >> insert >> update dummy_end
+dummy_start >> insert >> update >> dummy_end
