@@ -124,11 +124,12 @@ def update_sync_dms():
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
+dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
+
 update = PythonOperator(task_id="update", python_callable=update, dag=dag)
 
 handle_deleted_data = PythonOperator(task_id="handle_deleted_data", python_callable=handle_deleted_data, dag=dag)
 
 update_sync_dms = PythonOperator(task_id="update_sync_dms", python_callable=update_sync_dms, dag=dag)
 
-dummy_start >> update >> handle_deleted_data >> update_sync_dms
-
+dummy_start >> update >> handle_deleted_data >> update_sync_dms >> dummy_end
