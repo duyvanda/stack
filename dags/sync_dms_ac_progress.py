@@ -225,10 +225,12 @@ def call_bq_ps():
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
+dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
+
 insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
 
 update = PythonOperator(task_id="update", python_callable=update, dag=dag)
 
 call_bq_ps = PythonOperator(task_id="call_bq_ps", python_callable=call_bq_ps, dag=dag)
 
-dummy_start >> insert >> update >> call_bq_ps
+dummy_start >> insert >> update >> call_bq_ps >> dummy_end
