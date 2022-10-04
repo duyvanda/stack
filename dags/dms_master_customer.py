@@ -164,41 +164,8 @@ def update_customer():
     except AssertionError:
         print("No customer changed")
     else:
-        bqsql = \
-        """truncate table biteam.d_master_khachhang"""
-        execute_bq_query(bqsql)
-        bq_values_insert(df, "d_master_khachhang", 2)
-        # df.columns = cleancols(df)
-        # df.columns = lower_col(df)
-        # df['crtd_date'] = df.crtd_datetime.dt.normalize()
-        # df1 = df['crtd_date']
-        # df1.drop_duplicates(inplace=True)
-        # tpl_dt = tuple(df1.dt.strftime('%Y-%m-%d').to_list())
-        # df1 = df['custid']
-        # df1.drop_duplicates(inplace=True)
-        # tpl_ct = tuple(df1.to_list())
-        # print("tuple customer", tpl_ct)
-        # del_sql = \
-        # f"""
-        # DELETE FROM biteam.d_master_khachhang
-        # WHERE
-        # DATE(crtd_datetime) in {tpl_dt}
-        # AND custid in {tpl_ct}
-        # """
-        # execute_bq_query(del_sql)
-        # df['inserted_at'] = datetime.now()
-        # drop_cols(df, 'crtd_date')
-        # bq_values_insert(df, "d_master_khachhang", 2)
-
-# sql = \
-# """
-# select * from d_vptt
-# """
-# df = get_ps_df(sql)
-# bq_values_insert(df, "d_vptt", 1)
-# df=pd.read_csv("gpp_13042022.csv")
-# df['inserted_at'] = datetime.now()
-# bq_values_insert(df, "d_gpp_13042022", 3)
+        bq_values_insert(df, "d_master_khachhang", 3)
+        print("Process Done")
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
