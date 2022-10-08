@@ -56,6 +56,7 @@ bigqueryClient = bigquery.Client()
 
 sql = f""" 
 
+
 -- Create view view_report.f_data_kh_checkin_canchamsoc
 -- as
 
@@ -148,6 +149,19 @@ from data_email )
 
 select msnvcsmmoi, emailmoi from filter_email where row_ =1 ),
 
+phanquyen as (
+
+    with max_phanquyen as (
+  select manv,max(inserted_at) as max_inserted_at from `spatial-vision-343005.biteam.d_phanquyen_trading`
+group by 1 ),
+result as (
+select a.*
+from `spatial-vision-343005.biteam.d_phanquyen_trading` a
+JOIN max_phanquyen b on a.manv=b.manv and a.inserted_at =b.max_inserted_at 
+ where a.trangthaihoatdong='Còn hoạt động')
+ select * from result
+),
+
 
 result as (
  select  
@@ -179,10 +193,9 @@ result as (
   --       when c.slsperid ='MR1995' then 'nhanvt@merapgroup.com'
   --       when c.slsperid ='MR1605' then 'duyvq@merapgroup.com'
   -- else null end as send_email,
-  Case when 
-  f.emailmoi = 'thaoptt@merapgroup.com' then 'thaopt@merapgroup.com'
-  f.emailmoi is null then 'nhanvt@merapgroup.com' else f.emailmoi end as send_email
-  --'nhanvt@merapgroup.com' as send_email
+  Case 
+  when f.emailmoi = 'thaoptt@merapgroup.com' then 'thaopt@merapgroup.com'
+  when f.emailmoi is null then 'nhanvt@merapgroup.com' else f.emailmoi end as send_email
  from data_kh_quydinh_viengtham c
 
  LEFT JOIN group_data_kh_chua_viengtham  a on c.slsperid = a.slsperid and a.thang_=c.thang_
@@ -190,24 +203,31 @@ result as (
  LEFT JOIN data_tile_dh e on e.slsperid = c.slsperid and e.thang_ =c.thang_
  LEFT JOIN `biteam.d_users` d on d.manv =c.slsperid
  LEFT JOIN data_email f on f.msnvcsmmoi = c.slsperid
+
+  JOIN phanquyen g on g.manv = c.slsperid
+  where  d.position in ('S') -- and g.manv is null
  )
 
  select * from result
- 
-  where 
-  --slsperid in ('MR1282','MR1995','MR1605') and
+
+  where --slsperid in ('MR1282','MR1995','MR1605') and
  thang_ =check_thang 
  --and send_email ='nhanvt@merapgroup.com'
 
   --and c.thang_ ='2022-09-01'
-  order by thang_ 
+  --order by thang_ 
+
+
 
 """
 
 df = bigqueryClient.query(sql).to_dataframe()
 
+a=df.shape
+b=a[0]
+
 date_now = datetime.now().date()
-path=f'{csv_path}tt_hanhdong_crs/{date_now}_data_send_email.csv'
+path=f'{csv_path}tt_hanhdong_crs/{date_now}_{b}_data_send_email.csv'
 
 df.to_csv(path,index = False,header=False)
 
@@ -221,6 +241,9 @@ def sendmail(slsperid, tencvbh,thang_,thang_den,check_thang, so_kh_quydinh_vieng
     msg['From'] = EMAIL_ADDRESS
     # TO EMAIL
     msg['To'] = send_email
+    # CC EMAIL
+    cc='nhanvt@merapgroup.com'
+    # msg['Cc'] = 'nhanvt@merapgroup.com'
     # BODY
     html_str = f"""\
     <!DOCTYPE html>
@@ -253,15 +276,15 @@ def sendmail(slsperid, tencvbh,thang_,thang_den,check_thang, so_kh_quydinh_vieng
     with smtplib.SMTP_SSL('mail.merapgroup.com', 465) as smtp:
         conn_smtp = smtp.login(EMAIL_ADDRESS, EMAIL_PASSOWRD)
         print(conn_smtp)
-        smtp.sendmail(to_addrs=send_email, from_addr=EMAIL_ADDRESS, msg = msg.as_string())
+        smtp.sendmail(to_addrs=(send_email,cc), from_addr=EMAIL_ADDRESS, msg = msg.as_string())
         print('Message has been sent')
         print(send_email)
         
 def send_email_auto():
-    with open(f"{csv_path}tt_hanhdong_crs/{date_now}_data_send_email.csv",encoding='utf-8') as f:
+    with open(f"{csv_path}tt_hanhdong_crs/{date_now}_{b}_data_send_email.csv",encoding='utf-8') as f:
         # line=f.readlines()[1:]
         # f.close()
-        for i in range(130):
+        for i in range(0,b+1):
             try:
                 print(i)
                 slsperid, tencvbh,thang_,thang_den,check_thang, so_kh_quydinh_viengtham,so_kh_chua_viengtham, custid_saphetthoihanhieuluc,custid_hetthoihanhieuluc, sl_dh_thucte, sl_checkin_thucte,tile_dh, so_kh_viengtham_tt, sl_kh_checkin, sl_kh_phatsinhdh,send_email = f.readline().split(',')
