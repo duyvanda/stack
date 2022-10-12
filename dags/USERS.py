@@ -86,6 +86,7 @@ def update_table():
     df1['tenquanlykhuvuc'].replace("Nguyễn Thọ Chiến", "Nguyễn Thọ Chiến(KN)", inplace=True)
     df1['tenquanlykhuvuc'].replace("Bùi Hữu Toàn", "Bùi Hữu Toàn(KN)", inplace=True)
     df1['tenquanlykhuvuc'].replace("Nguyễn Hoàng Viển", "Nguyễn Hoàng Viển(KN)", inplace=True)
+    df1['tenquanlykhuvuc'].replace("Võ Thị Kim Liên", "Nguyễn Thọ Chiến(KN)", inplace=True)
     # df_users = get_ps_df("select manv from d_users")
     if True:
         df1['tenquanlytt'].fillna(df1.tenquanlykhuvuc, inplace=True)
