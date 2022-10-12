@@ -11,12 +11,10 @@ import os
 
 local_tz = pendulum.timezone("Asia/Bangkok")
 
-name='Gdocs'
+name='Gdocs_2023'
 prefix='SC_'
 csv_path = '/usr/local/airflow/plugins'+'/'
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{csv_path}/nhan/spatial-vision-343005-340470c8d77b.json"
-
-
 dag_params = {
     'owner': 'nhanvo',
     "depends_on_past": False,
@@ -31,7 +29,8 @@ dag_params = {
 }
 
 service = get_service()
-spreadsheets_id = '13Gg1pzdNlsocvt0-Ws41mVoeUUDEsUBOrt5O8J-7aLM'
+spreadsheets_id = '1cauiqQ4wS19YV1PTwIlKxpcRA6iv_dtRMwNXGPu7em4'
+
 
 sql = \
 '''
@@ -55,7 +54,7 @@ Case when EXTRACT(month from thang) = 1 then 'JAN'
 EXTRACT(month from thang) as month,
 EXTRACT(year from thang) as year,
 Case 
-WHEN EXTRACT(year from thang) = 2021 then 'ACT LY'
+WHEN EXTRACT(year from thang) = 2022 then 'ACT LY'
 ELSE 'ACT TY' end as data_type,
 CASE 
 WHEN phanam = 'PHA NAM' then 'MDS'
@@ -93,7 +92,7 @@ LEFT(masanpham,1) != 'V'
 AND a.manv not in ('MA001', 'MA002', 'QUYNHPTA')
 AND makenhkh not in ( 'NB')
 AND phanam not in ( 'PHA NAM' )
-AND EXTRACT(year from thang) >= 2021 and EXTRACT(year from thang) <=2022
+AND EXTRACT(year from thang) >= 2022
 ),
 
 result_h_data as (
@@ -141,7 +140,10 @@ from result_h_data a
 LEFT JOIN sale_days b on a.month = b.month and a.year = b.year
 LEFT JOIN ( SELECT masanpham,tensanphamnb,makenhkh,data_type,round(avg(soluong),0) as soluong, round(avg(doanhsochuavat),0) as doanhsochuavat  from result_h_data where year = EXTRACT(year from (select * from `biteam.d_current_table`)) and month < EXTRACT(month from (select * from `biteam.d_current_table`)) GROUP BY masanpham,tensanphamnb,makenhkh,data_type ) c on concat(c.masanpham,c.tensanphamnb,c.makenhkh,c.data_type) = concat(a.masanpham,a.tensanphamnb,a.makenhkh,a.data_type)
 ORDER BY a.masanpham,a.makenhkh,a.month
+
 '''
+
+
 
 dag = DAG(prefix+name,
           catchup=False,
