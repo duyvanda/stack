@@ -94,8 +94,8 @@ def update_table():
         #13/01
         df1.drop_duplicates(keep='first', inplace=True, subset=['manv'])
         bq_values_insert(df1, 'd_users', 3)
-        # commit_psql("truncate table d_users cascade;")
-        # execute_values_insert(df1, "d_users")
+        commit_psql("truncate table d_users cascade;")
+        execute_values_insert(df1, "d_users")
     else:
         None
 
