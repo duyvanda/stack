@@ -52,7 +52,7 @@ def update_phanquyen_report():
     df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSuXl7AnpSA5j_KrgFO2zhLn8DsD20RVuuG7g6Y7F9y5EbiPHT05ug_m3eh8MBOaMDvNmk-DX4g0igF/pub?gid=604781671&single=true&output=csv")
     cleancols(df)
     df.columns =lower_col(df)
-    df_aut = pd.melt(df,id_vars=['tenreport', 'linkreport', 'type'])
+    df_aut = pd.melt(df,id_vars=['tenreport', 'linkreport', 'type','id', 'width'])
     df_aut=df_aut[~df_aut['value'].isna()]
     df_aut.rename(columns={'value':'accessgroup'},inplace=True)
 

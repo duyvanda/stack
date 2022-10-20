@@ -115,7 +115,8 @@ date_time = now.strftime("%m-%d-%Y_%H-%M")
 #     df2_final=df2.dropna(subset=['sku'])
 
 def get_link():
-    url="""https://shopee.vn/api/v4/recommend/recommend?bundle=shop_page_main&item_card=2&limit=10&offset=0&shopid=799716829"""
+    url ="""https://shopee.vn/api/v4/recommend/recommend?bundle=shop_page_category_tab_main&item_card=2&limit=30&offset=0&section=shop_page_category_tab_main_sec&shopid=799716829&sort_type=1&tab_name=popular"""
+    # url="""https://shopee.vn/api/v4/recommend/recommend?bundle=shop_page_main&item_card=2&limit=10&offset=0&shopid=799716829"""
     headers = CaseInsensitiveDict()
     headers['sec-ch-ua'] = '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"'
     headers['sec-ch-ua-mobile'] = '?1'
@@ -216,7 +217,13 @@ def get_data(data):
         ]]
 
     df2=df1.join(df_rating1)
-    df2_final=df2.dropna(subset=['sku'])
+    df2_1=df2.dropna(subset=['sku'])
+    df2_1[['sku','shopid1']]=df2_1['sku'].str.split(':', expand=True)
+    df2_final= df2_1[[
+            'shopid','sku','name','price','price_min','price_max','show_discount','status','stock','sold','historical_sold','liked_count',
+            'cmt_count','image','rating_star','rcount_with_image','rcount_with_context'
+        ]]
+
     return df2_final
 
 
