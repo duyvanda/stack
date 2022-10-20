@@ -58,19 +58,26 @@ def update():
     CustID,
     AccumulatedValue, 
     Reward FROM dbo.OM_AccumulatedResult
-    WHERE AccumulateID='CSBH22Q2-14QD/MR'
+    WHERE AccumulateID='CSBH22Q2-14QD/MR' and LineRef = '00001'
     """
     sql3 = \
     f"""
-    SELECT
+    SELECT 
+    --ars.LineRef,
     sa.CustID,
+    --sa.FromDate,
+    --sa.ToDate,
     sum(case when LEFT(sa.OrderNbr,2) = 'CO' then -1*Amt else 1*Amt end) as PaidAmt
     FROM dbo.OM_SalesOrdAccumulate sa 
+    INNER JOIN dbo.OM_AccumulatedResult ars ON ars.CustID = sa.CustID AND ars.AccumulateID = sa.AccumulateID AND sa.FromDate=ars.FromDate AND sa.ToDate=ars.ToDate
     INNER JOIN OM_SalesOrd so ON
     sa.OrderNbr = so.OrderNbr and
     sa.BranchID = so.BranchID and
     so.Status = 'C'
-    WHERE AccumulateID='CSBH22Q2-14QD/MR' group by sa.CustID
+    WHERE sa.AccumulateID='CSBH22Q2-14QD/MR' 
+    and sa.FromDate>='2022-03-01' AND sa.ToDate<='2022-06-30'
+    group by ars.LineRef, sa.CustID
+    --sa.FromDate, sa.ToDate
     """
     df1 = get_ms_df(sql1)
     df2 = get_ms_df(sql2)
@@ -102,19 +109,26 @@ def update():
     CustID,
     AccumulatedValue, 
     Reward FROM dbo.OM_AccumulatedResult
-    WHERE AccumulateID='CSBH22Q2-04QD/PN'
+    WHERE AccumulateID='CSBH22Q2-04QD/PN' and LineRef = '00001'
     """
     sql3 = \
     f"""
     SELECT
+    --ars.LineRef,
     sa.CustID,
+    --sa.FromDate,
+    --sa.ToDate,
     sum(case when LEFT(sa.OrderNbr,2) = 'CO' then -1*Amt else 1*Amt end) as PaidAmt
     FROM dbo.OM_SalesOrdAccumulate sa 
+    INNER JOIN dbo.OM_AccumulatedResult ars ON ars.CustID = sa.CustID AND ars.AccumulateID = sa.AccumulateID AND sa.FromDate=ars.FromDate AND sa.ToDate=ars.ToDate
     INNER JOIN OM_SalesOrd so ON
     sa.OrderNbr = so.OrderNbr and
     sa.BranchID = so.BranchID and
     so.Status = 'C'
-    WHERE AccumulateID='CSBH22Q2-04QD/PN' group by sa.CustID
+    WHERE sa.AccumulateID='CSBH22Q2-14QD/MR' 
+    and sa.FromDate>='2022-03-01' AND sa.ToDate<='2022-06-30'
+    group by ars.LineRef, sa.CustID
+    --sa.FromDate, sa.ToDate
     """
     df1 = get_ms_df(sql1)
     df2 = get_ms_df(sql2)
@@ -132,7 +146,5 @@ dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
 
 update = PythonOperator(task_id="update", python_callable=update, dag=dag)
-
-# update_sync_dms_ardoc_2 = PythonOperator(task_id="update_sync_dms_ardoc_2", python_callable=update_sync_dms_ardoc_2, dag=dag)
 
 dummy_start >> update >> insert
