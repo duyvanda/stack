@@ -156,8 +156,11 @@ def update_customer():
     df.territorycode = df.territorycode.astype('float')
     df.salessystem = df.salessystem.astype('float')
     df.businessscope.replace('', None, inplace=True)
+    
 #     df.businessscope = df.businessscope.str.replace('05','1').str.replace('06','2').str.replace('07','3').str.replace('08','4').str.replace('09','5')
 
+    
+    
     try:
         print("data shape", df.shape)
         assert df.shape[0] >0
