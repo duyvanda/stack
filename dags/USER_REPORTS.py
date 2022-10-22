@@ -128,7 +128,7 @@ def main():
     # SELECT tenreport, id, manv, type, vw FROM `spatial-vision-343005.biteam.d_phanquyen_tonghop_sep`
     # full_df[['tenreport','id','manv','type','vw', 'param']]
     with open('user_reports.json', 'w', encoding='utf-8') as file:
-        full_df[['tenreport','id','manv','type','vw']].to_json(file, force_ascii=False, orient='records')
+        full_df[['tenreport','id','manv','type','vw','param']].to_json(file, force_ascii=False, orient='records')
     upload_file_to_bucket_with_metadata(blobname="public/user_reports.json", file="user_reports.json")
 
 # %%
