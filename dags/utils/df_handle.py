@@ -550,5 +550,21 @@ def upload_file_to_bucket(blobname: str, df_tocsv_method: pd.DataFrame.to_csv, f
         bucket = client.get_bucket(bucketname)
         blob = bucket.blob(blobname)
         blob.upload_from_string(df_tocsv_method, content_type=filetype)
+        
+ def upload_file_to_bucket_with_metadata(blobname: str, file, bucketname='django_media_biteam'):
+    '''
+    bucketname: default is django_media_biteam
+    blobname: strpath example bucket.blob("admin/duy.csv")
+    file: D:/duy.csv
+    filetype: default is text/csv, can be 'application/json'
+    '''
+    with closing(storage.Client()) as client:
+        bucket = client.get_bucket(bucketname)
+        blob = bucket.blob(blobname)
+        # metadata = {'Cache-Control': 'no-cache'}
+        # blob.metadata = metadata
+        blob.cache_control = 'no-cache'
+        blob.upload_from_filename(file)
+        return blob.public_url
     
     
