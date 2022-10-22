@@ -21,7 +21,7 @@ pjt = 'spatial-vision-343005'
 dts = '.biteam'
 # print("DDefault bq project: ",pjt+dts)
 
-def bq_values_insert(df, table:str, option:int, schema=None, reauth=False) -> None:
+def bq_values_insert(df, table:str, option:int, schema=None, reauth=False, chunksize=None) -> None:
     '''
     require df, table, option (1-fail, 2-append, 3-replace)
     Schema is a dict, default = None
@@ -29,11 +29,11 @@ def bq_values_insert(df, table:str, option:int, schema=None, reauth=False) -> No
     df.columns = cleancols(df)
     df.columns = lower_col(df)
     if option == 1:
-        pdq.to_gbq(df, 'biteam.'+table, project_id="spatial-vision-343005", if_exists="fail", reauth=reauth)
+        pdq.to_gbq(df, 'biteam.'+table, project_id="spatial-vision-343005", if_exists="fail", reauth=reauth, chunksize=chunksize)
     elif option == 2:
-        pdq.to_gbq(df, 'biteam.'+table, project_id="spatial-vision-343005", if_exists="append", reauth=reauth)
+        pdq.to_gbq(df, 'biteam.'+table, project_id="spatial-vision-343005", if_exists="append", reauth=reauth, chunksize=chunksize)
     elif option == 3:
-        pdq.to_gbq(df, 'biteam.'+table, project_id="spatial-vision-343005", if_exists="replace", reauth=reauth)
+        pdq.to_gbq(df, 'biteam.'+table, project_id="spatial-vision-343005", if_exists="replace", reauth=reauth, chunksize=chunksize)
     else:
         print('option can be 1 2 3')
         raise NameError

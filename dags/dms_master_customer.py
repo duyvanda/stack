@@ -18,6 +18,7 @@ local_tz = pendulum.timezone("Asia/Bangkok")
 name='MASTER_CUSTOMER'
 prefix='DMS_'
 path = f'/usr/local/airflow/plugins/{prefix}{name}/'
+csv_path = '/usr/local/airflow/plugins'+'/'
 
 # datenow_min1 = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
@@ -29,9 +30,9 @@ dag_params = {
     # 'email_on_retry': False,
     # 'email':['duyvq@merapgroup.com', 'vanquangduy10@gmail.com'],
     'do_xcom_push': False,
-    'execution_timeout':timedelta(seconds=300)
-    # 'retries': 3,
-    # 'retry_delay': timedelta(minutes=10),
+    'execution_timeout':timedelta(seconds=300),
+    'retries': 3,
+    'retry_delay': timedelta(seconds=10),
 }
 
 dag = DAG(prefix+name,
@@ -156,24 +157,27 @@ def update_customer():
     df.territorycode = df.territorycode.astype('float')
     df.salessystem = df.salessystem.astype('float')
     df.businessscope.replace('', None, inplace=True)
-    
+    df.to_pickle(path+'df.pickle')
 #     df.businessscope = df.businessscope.str.replace('05','1').str.replace('06','2').str.replace('07','3').str.replace('08','4').str.replace('09','5')
 
     
-    
+def insert():
+    df = pd.read_pickle(path+'df.pickle')
     try:
         print("data shape", df.shape)
         assert df.shape[0] >0
     except AssertionError:
         print("No customer changed")
     else:
-        bq_values_insert(df, "d_master_khachhang", 3)
+        bq_values_insert(df, "d_master_khachhang", 3, chunksize=5000)
         print("Process Done")
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
 update_customer = PythonOperator(task_id="update_customer", python_callable=update_customer, dag=dag)
 
+insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
+
 dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
 
-dummy_start >> update_customer >> dummy_end
+dummy_start >> update_customer >> insert >> dummy_end
