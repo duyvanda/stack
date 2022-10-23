@@ -75,14 +75,14 @@ def update_phanquyen_report():
     full_df = pd.merge(df_aut,df0,how='inner', on='accessgroup')
 
     # #Join phân quyền theo chuc danh đối với cấp CA
-    df1 = pd.DataFrame()
-    for i in ca_link:
-        df = pd.read_csv(i)
-        df1 = pd.concat([df1,df])
-    full_df_ca = pd.merge(df_aut,df1,how='inner',left_on='accessgroup', right_on='chucdanh')
+    # df1 = pd.DataFrame()
+    # for i in ca_link:
+    #     df = pd.read_csv(i)
+    #     df1 = pd.concat([df1,df])
+    # full_df_ca = pd.merge(df_aut,df1,how='inner',left_on='accessgroup', right_on='chucdanh')
 
     #nối data & inset to BQ
-    full_df = pd.concat([full_df,full_df_ca])
+    # full_df = pd.concat([full_df,full_df_ca])
     df_mail = full_df[['email','tencvbh']]
     df_mail['email1'] = df_mail['email'].str.lower()
     df_mail = dropdup(df_mail,3,subset='email1')

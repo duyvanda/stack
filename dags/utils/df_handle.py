@@ -11,7 +11,7 @@ from typing import Iterable, List, Optional, Tuple
 from datetime import datetime, timedelta
 import psycopg2.extras as extras
 from psycopg2 import OperationalError, errorcodes, errors
-from google.cloud import bigquery
+from google.cloud import bigquery, storage
 
 # os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get("GC_SERVICE_FILE")
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/usr/local/airflow/dags/files/bigquery2609.json"
@@ -551,7 +551,7 @@ def upload_file_to_bucket(blobname: str, df_tocsv_method: pd.DataFrame.to_csv, f
         blob = bucket.blob(blobname)
         blob.upload_from_string(df_tocsv_method, content_type=filetype)
         
- def upload_file_to_bucket_with_metadata(blobname: str, file, bucketname='django_media_biteam'):
+def upload_file_to_bucket_with_metadata(blobname: str, file, bucketname='django_media_biteam'):
     '''
     bucketname: default is django_media_biteam
     blobname: strpath example bucket.blob("admin/duy.csv")

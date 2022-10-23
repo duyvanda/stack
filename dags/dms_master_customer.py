@@ -169,7 +169,7 @@ def insert():
     except AssertionError:
         print("No customer changed")
     else:
-        bq_values_insert(df, "d_master_khachhang", 3, chunksize=5000)
+        bq_values_insert(df, "d_master_khachhang", 3, chunksize=10000)
         print("Process Done")
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
