@@ -125,7 +125,7 @@ def update():
     sa.OrderNbr = so.OrderNbr and
     sa.BranchID = so.BranchID and
     so.Status = 'C'
-    WHERE sa.AccumulateID='CSBH22Q2-14QD/MR' 
+    WHERE sa.AccumulateID='CSBH22Q2-04QD/PN' 
     and sa.FromDate>='2022-07-01' AND sa.ToDate<='2022-09-30'
     group by ars.LineRef, sa.CustID
     --sa.FromDate, sa.ToDate
