@@ -21,7 +21,7 @@ pjt = 'spatial-vision-343005'
 dts = '.biteam'
 # print("DDefault bq project: ",pjt+dts)
 
-def bq_values_insert(df, table:str, option:int, schema=None, reauth=False, chunksize=None) -> None:
+def bq_values_insert(df, table:str, option:int, schema=None, reauth=False, chunksize=10000) -> None:
     '''
     require df, table, option (1-fail, 2-append, 3-replace)
     Schema is a dict, default = None
