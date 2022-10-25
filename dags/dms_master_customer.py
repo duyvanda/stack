@@ -145,6 +145,8 @@ LEFT JOIN SI_State as sta WITH(NOLOCK) on  sta.Country = CustInvoice1.CountryID 
 LEFT JOIN SI_District as dis WITH(NOLOCK) on  dis.District = CustInvoice1.DistrictID  
 LEFT JOIN SI_Ward as war WITH(NOLOCK)  on  war.Country = CustInvoice1.CountryID AND war.State = CustInvoice1.State AND war.District = CustInvoice1.DistrictID AND war.Ward = CustInvoice1.Ward
 LEFT JOIN AR_CustomerLocation as arcl WITH(NOLOCK)  on  arcl.CustID = a.CustID AND arcl.BranchID = a.BranchID
+LEFT JOIN dbo.AR_TaxDeclaration tc ON a.TaxDeclaration=tc.Code
+LEFT JOIN dbo.AR_StockSales act ON act.Code=a.StockSales
 """
 
 # print(sql)
