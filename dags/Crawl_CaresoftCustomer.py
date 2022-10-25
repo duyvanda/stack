@@ -4,42 +4,42 @@ import requests
 from requests.structures import CaseInsensitiveDict
 
 # %% [markdown]
-# import pendulum
-# from airflow import DAG
-# from airflow.operators.dummy_operator import DummyOperator
-# from airflow.operators.python_operator import PythonOperator
-# 
-# local_tz = pendulum.timezone("Asia/Bangkok")
-# 
-# name='CareSoftCustomer'
-# prefix='Crawl_'
-# csv_path = '/usr/local/airflow/plugins'+'/'
-# 
-# dag_params = {
-#     'owner': 'airflow',
-#     "depends_on_past": False,
-#     'start_date': datetime(2022, 5, 14, tzinfo=local_tz),
-#     # 'email_on_failure': True,
-#     # 'email_on_retry': False,
-#     # 'email':['duyvq@merapgroup.com', 'vanquangduy10@gmail.com'],
-#     'do_xcom_push': False,
-#     'execution_timeout':timedelta(seconds=300)
-#     # 'retries': 3,
-#     # 'retry_delay': timedelta(minutes=10),
-# }
-# 
-# dag = DAG(prefix+name,
-#           catchup=False,
-#           default_args=dag_params,
-#           schedule_interval= '*/30 8-20,23-23 * * *',
-#           tags=[prefix+name, 'Sync', '30mins']
-# )
+import pendulum
+from airflow import DAG
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
+
+local_tz = pendulum.timezone("Asia/Bangkok")
+
+name='CareSoftCustomer'
+prefix='Crawl_'
+csv_path = f'/usr/local/airflow/plugins/{prefix}{name}/'
+
+dag_params = {
+    'owner': 'airflow',
+    "depends_on_past": False,
+    'start_date': datetime(2022, 5, 14, tzinfo=local_tz),
+    # 'email_on_failure': True,
+    # 'email_on_retry': False,
+    # 'email':['duyvq@merapgroup.com', 'vanquangduy10@gmail.com'],
+    'do_xcom_push': False,
+    'execution_timeout':timedelta(seconds=300)
+    # 'retries': 3,
+    # 'retry_delay': timedelta(minutes=10),
+}
+
+dag = DAG(prefix+name,
+          catchup=False,
+          default_args=dag_params,
+          schedule_interval= '@daily',
+          tags=[prefix+name, 'daily']
+)
 
 # %%
 data1 = {"from":1643652037221,"to":1656608154405}
 data2 = {"from": 1656612054988, "to": 1667235316382}
 list_dict = [data1, data2]
-list_pickle_pathname = ["part1.pickle", "part2.pickle"]
+list_pickle_pathname = [csv_path+"part1.pickle", csv_path+"part2.pickle"]
 
 # %%
 def get_data(pickle_pathname: str, data: dict):
@@ -54,24 +54,37 @@ def get_data(pickle_pathname: str, data: dict):
     df = pd.read_excel(resp.json()['status']['extraData']['urlToFile'])
     df.columns = cleancols(df)
     df.columns = lower_col(df)
+    
     df.to_pickle(pickle_pathname)
 
 # %%
-zipped = zip(list_dict, list_pickle_pathname)
-for tuple in zipped:
-    print(tuple[0], tuple[1])
-    get_data(tuple[1], tuple[0])
-    # print(tuple[0], tuple[1])
+def get_pickle():
+    pass
+    # zipped = zip(list_dict, list_pickle_pathname)
+    # for tuple in zipped:
+    #     print(tuple[0], tuple[1])
+    #     get_data(tuple[1], tuple[0])
+
+def insert():
+    df1 = pd.read_pickle(csv_path+"part1.pickle")
+    # bq_values_insert(df, "d_caresoft_customer")
+    df2 = pd.read_pickle(csv_path+"part2.pickle")
+    # bq_values_insert(df, "d_caresoft_customer")
+    df3 = union_all([df1,df2])
+    print(df3.columns)
+    bq_values_insert(df3, "d_caresoft_customer", 3)
+
+
 
 # %% [markdown]
-# dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
-# 
-# dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
-# 
-# insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
-# 
-# update = PythonOperator(task_id="update", python_callable=update, dag=dag)
-# 
-# dummy_start >> update >> insert >> dummy_end
+dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
+
+dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
+
+get_pickle = PythonOperator(task_id="get_pickle", python_callable=get_pickle, dag=dag)
+
+insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
+
+dummy_start >> get_pickle >> insert >> dummy_end
 
 
