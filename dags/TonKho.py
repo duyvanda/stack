@@ -192,7 +192,7 @@ def tonkho():
 
     df5.head()
 
-    df5.to_csv(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF5.csv', index=False)
+    df5.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF5.pickle')
 
     # df5.dtypes
 
