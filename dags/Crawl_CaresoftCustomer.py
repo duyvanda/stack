@@ -53,6 +53,8 @@ def get_data(pickle_pathname: str, data: dict):
     df = pd.read_excel(resp.json()['status']['extraData']['urlToFile'], dtype={'Số điện thoại chính': str, 'Số điện thoại phụ 1': str})
     df.columns = cleancols(df)
     df.columns = lower_col(df)
+    df.thoidiemcapnhat = pd.to_datetime(df.thoidiemcapnhat)
+    df.thoidiemtao = pd.to_datetime(df.thoidiemtao)
     df.to_pickle(pickle_pathname)
 
 # %%
