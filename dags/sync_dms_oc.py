@@ -85,6 +85,10 @@ def update():
         execute_bq_query(dsql)
         df['inserted_at'] = datetime.now()
         bq_values_insert(df, f"{table_name}", 2)
+
+        # create file sensor
+        with open(csv_path+f'FILESENSOR/{prefix+name}.txt','w') as f:
+            f.close()
     except AssertionError:
         print("No new data")
 

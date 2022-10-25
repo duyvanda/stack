@@ -144,6 +144,7 @@ def cleancols(df):
     df.columns = df.columns.str.replace('-', '', regex=False)
     df.columns = df.columns.str.replace('*', '', regex=False)
     df.columns = df.columns.str.replace('&', '', regex=False)
+    df.columns = df.columns.str.replace(',', '', regex=False)
     return df.columns
 
 def print_df_schema(df):

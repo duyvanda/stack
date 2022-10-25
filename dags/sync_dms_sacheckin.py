@@ -102,6 +102,10 @@ def update():
         df['inserted_at'] = datetime.now()
         df.to_csv(f'{csv_path}{prefix}{name}/file.csv', index=False)
         bq_values_insert(df, f"{table_name}", 2)
+
+        # create file sensor
+        with open(csv_path+f'FILESENSOR/{prefix+name}.txt','w') as f:
+            f.close()
     except AssertionError:
         print("No data to input")
 

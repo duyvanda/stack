@@ -54,16 +54,15 @@ def get_data(pickle_pathname: str, data: dict):
     df = pd.read_excel(resp.json()['status']['extraData']['urlToFile'])
     df.columns = cleancols(df)
     df.columns = lower_col(df)
-    
+
     df.to_pickle(pickle_pathname)
 
 # %%
 def get_pickle():
-    pass
-    # zipped = zip(list_dict, list_pickle_pathname)
-    # for tuple in zipped:
-    #     print(tuple[0], tuple[1])
-    #     get_data(tuple[1], tuple[0])
+    zipped = zip(list_dict, list_pickle_pathname)
+    for tuple in zipped:
+        print(tuple[0], tuple[1])
+        get_data(tuple[1], tuple[0])
 
 def insert():
     df1 = pd.read_pickle(csv_path+"part1.pickle")

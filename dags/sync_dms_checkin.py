@@ -88,6 +88,12 @@ def insert():
         print(bqsql)
         execute_bq_query(bqsql)
         bq_values_insert(TRACE, "d_checkin", 2)
+
+        # create file sensor
+        with open(csv_path+f'FILESENSOR/{prefix+name}.txt','w') as f:
+            f.close()
+
+
     except AssertionError:
         print("There is no data")
 
