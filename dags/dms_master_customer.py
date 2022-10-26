@@ -120,6 +120,7 @@ AutoGenOrder = case when a.GenOrders ='KTHD' then N'Không tạo hóa đơn'
 a.Attn,
 a.BusinessScope,
 a.BusinessName,
+a.LegalDate,
 tc.Descr as TaxDeclaration,
 act.Descr as StockSales,
 arcl.Lat,

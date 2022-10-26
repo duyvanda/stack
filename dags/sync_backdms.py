@@ -1,3 +1,4 @@
+from ast import Raise
 from utils.df_handle import *
 
 import pendulum
@@ -499,6 +500,7 @@ def update_sync_dms_ibd():
         dfs = dfs_diff(countbq, countdms)
         assert dfs.shape[0] == 0, "NO DIFF"
         print("NO DIFF")
+        raise AssertionError
     except AssertionError:
         # pass
         sql = \
