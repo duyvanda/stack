@@ -52,6 +52,11 @@ def insert():
     bq_values_insert(df, "f_crawl_logqrcode", 3)
 
 # %%
+
+dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
+
+insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
+
 dummy_start >> insert
 
 # %%
