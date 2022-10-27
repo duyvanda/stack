@@ -53,7 +53,7 @@ def insert():
     df['pathname_01'] = df.pathname.str.split("/", expand=True)[1]
     df['pathname_02'] = df.pathname.str.split("/", expand=True)[2]
     df['title_page_01'] = df.title_page.str.split("|", expand=True)[0]
-    df['title_page_01'].to_clipboard()
+    # df['title_page_01'].to_clipboard()
     df['title_page_02'] = df.title_page.str.split("|", expand=True)[1]
     dk1 = df['title_page_02'].str.contains('Từ khóa')
     df['title_page_03'] = np.where(dk1, df['title_page_02'], None)
