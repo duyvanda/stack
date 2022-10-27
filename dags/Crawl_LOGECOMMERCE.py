@@ -50,6 +50,14 @@ def insert():
     df = pd.DataFrame(resp.json()['data'])
     df.created_at = pd.to_datetime(df.created_at)
     df['inserted_at'] = datetime.now()
+    df['pathname_01'] = df.pathname.str.split("/", expand=True)[1]
+    df['pathname_02'] = df.pathname.str.split("/", expand=True)[2]
+    df['title_page_01'] = df.title_page.str.split("|", expand=True)[0]
+    df['title_page_01'].to_clipboard()
+    df['title_page_02'] = df.title_page.str.split("|", expand=True)[1]
+    dk1 = df['title_page_02'].str.contains('Từ khóa')
+    df['title_page_03'] = np.where(dk1, df['title_page_02'], None)
+    df['title_page_03'] = df['title_page_03'].str.split(":", expand=True)[1]
     bq_values_insert(df, "f_crawl_logecommerce", 3)
 
 # %%
