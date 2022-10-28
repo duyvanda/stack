@@ -163,6 +163,11 @@ def update_customer():
     df.territorycode = df.territorycode.astype('float')
     df.salessystem = df.salessystem.astype('float')
     df.businessscope.replace('', None, inplace=True)
+    G_list = ['CHUOI','CLC1','CLC2','CLC3','INS1','INS2','INS3']
+    G_Cust = ['P4724-0337']
+    dk1 = df.shoptype.isin(G_list)
+    dk2 = df.custid.isin(G_Cust)
+    df['GType'] = np.where(dk1 | dk2,"G", "No-G")
     df.to_pickle(path+'df.pickle')
 #     df.businessscope = df.businessscope.str.replace('05','1').str.replace('06','2').str.replace('07','3').str.replace('08','4').str.replace('09','5')
 

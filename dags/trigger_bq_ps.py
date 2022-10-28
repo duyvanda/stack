@@ -28,7 +28,7 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '*/30 6-23 * * *',
+          schedule_interval= '*/30 8-23 * * *',
           tags=[prefix+name, 'trigger']
 )
 

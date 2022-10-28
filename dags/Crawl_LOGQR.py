@@ -38,7 +38,7 @@ dag = DAG(prefix+name,
 
 # %%
 def insert():    
-    url = "https://eoffice.merapgroup.com/eoffice/api/api/raw/log-qrcode"
+    url = "https://eoffice.merapgroup.com/eoffice/api/api/raw/log-qrcode?limit=100000"
     headers = CaseInsensitiveDict()
     headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC96YWxvXC9kYXRhLWN1c3RvbWVyIiwiaWF0IjoxNjQ3NTA3ODMxLCJleHAiOjE5NTg1NDc4MzEsIm5iZiI6MTY0NzUwNzgzMSwianRpIjoiSlduRjNvcG10a0dEdjBkVSIsInN1YiI6MSwicHJ2IjoiMmFhNjM5ZGEwOTRhNjY4YTQ4NGRkZTJkZjc2NGI5ODg2OTkxMjQ5NiJ9.xtdYIHOiTBdV7Cn_FDSiOTRuPtJ7HD_yjJfE0pZIMw0'
     headers['accept'] = 'application/json'

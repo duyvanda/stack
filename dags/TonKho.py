@@ -458,7 +458,8 @@ def tonkho():
 
     # điều kiện input
 def update_tonkho():
-    dk  = datetime.now().strftime("%H:%M") in {'11:00','12:00','14:00','23:45'}
+    dk  = datetime.now().strftime("%H:%M") in {'11:00','12:00','15:00','23:45'}
+    # dk = True
     if dk: tonkho()
     else: print("Not a good time", datetime.now().strftime("%H:%M"))
 # End

@@ -77,7 +77,7 @@ def main():
     df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSuXl7AnpSA5j_KrgFO2zhLn8DsD20RVuuG7g6Y7F9y5EbiPHT05ug_m3eh8MBOaMDvNmk-DX4g0igF/pub?gid=1043526978&single=true&output=csv")
     cleancols(df)
     df.columns =lower_col(df)
-    df_aut = pd.melt(df,id_vars=['tenreport', 'linkreport', 'type','id', 'vw', 'param'])
+    df_aut = pd.melt(df,id_vars=['stt', 'tenreport', 'linkreport', 'type','id', 'vw', 'param'])
     df_aut=df_aut[~df_aut['value'].isna()]
     df_aut.rename(columns={'value':'accessgroup'},inplace=True)
 
@@ -121,6 +121,7 @@ def main():
 
 
     full_df['inserted_at']=datetime.now()
+    full_df=full_df.sort_values('stt')
 
     # full_df.to_clipboard()
     full_df = dropdup(full_df, 1, subset=['id', 'manv'])
