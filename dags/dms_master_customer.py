@@ -38,7 +38,7 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '*/30 * * * *',
+          schedule_interval= '5 7,11,16,23 * * *',
           tags=[prefix+name, 'Sync', 'at0']
 )
 
@@ -163,7 +163,7 @@ def update_customer():
     df.territorycode = df.territorycode.astype('float')
     df.salessystem = df.salessystem.astype('float')
     df.businessscope.replace('', None, inplace=True)
-    G_list = ['CHUOI','CLC1','CLC2','CLC3','INS1','INS2','INS3']
+    G_list = ['CHUOI','CLC1','CLC2','CLC3', 'CLC4', 'INS1','INS2','INS3']
     G_Cust = ['P4724-0337']
     dk1 = df.shoptype.isin(G_list)
     dk2 = df.custid.isin(G_Cust)

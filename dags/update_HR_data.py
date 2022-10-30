@@ -85,6 +85,8 @@ def load_hr_data():
     df_nghiviec= pd.read_excel(path+f"{datenow}_"+"DSNS_PN-MRTD.xlsx",sheet_name='NGHI VIEC')
     df_biendong = pd.read_excel(path+f"{datenow}_"+"DSNS_PN-MRTD.xlsx",sheet_name='Theo doi bien dong')
 
+    print("Done convert to df")
+
     lst_df = [df_thongtin,df_nghiviec,df_biendong]
     for i in lst_df:
         cleancols(i)
@@ -94,23 +96,29 @@ def load_hr_data():
 
     # df_thongtin['ngaynghiviecdieuchuyen'] = np.where(df_thongtin['ngaynghiviecdieuchuyen'].str.contains("TS"), nan, df_thongtin['ngaynghiviecdieuchuyen'])
     lst = ['ngayvaolamviec','ngaythangnamsinh','ngaycap', 'tungay','denngay','ngayketthucthuviec','ngaynghiviecdieuchuyen']
-
     for i in lst:
+        print("df_thongtin 1", i)
         df_thongtin[i]= pd.to_datetime(df_thongtin[i], utc=True)
-
-
-
+        
     lst = ['ngayvaolamviec','ngaythangnamsinh', 'tungay','ngayketthucthuviec','ngaynghiviec']
     for i in lst:
-        df_nghiviec[i]= pd.to_datetime(df_nghiviec[i].astype(str), utc=True)   
+        print("df_nghiviec 1", i)
+        df_nghiviec[i]= pd.to_datetime(df_nghiviec[i].astype(str), utc=True)
+        
 
     lst = ['ngaycap','denngay'] 
     for i in lst:
-        df_nghiviec[i]= pd.to_datetime(df_nghiviec[i], utc=True)   
-
+        print("df_nghiviec 2", i)
+        df_nghiviec[i]= pd.to_datetime(df_nghiviec[i], utc=True)
+        
+    
     lst = ['ngayvaolamviec','thoigianapdung']
     for i in lst:
+        print("df_biendong", i)
         df_biendong[i]= pd.to_datetime(df_biendong[i], utc=True)
+        
+
+    # print("df_biendong ['ngayvaolamviec','thoigianapdung'] ")
 
 
     lst = ['cmnd','solanhdlddaky', 'sosobh','sl', 'ngaysn','thangsn','namsn','tuoi','masothue','bophange','phanloainghiviec','ghichutinhhinhnhansunghiviec','ghichu']
