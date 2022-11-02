@@ -746,7 +746,7 @@ def update_sync_dms_orddisc():
     INNER JOIN dbo.OM_DiscSeq sq WITH (NOLOCK)
     ON sq.DiscID = dis.DiscID
     AND sq.DiscSeq = dis.DiscSeq
-    where CAST(dis.Crtd_DateTime as date) <= '{datenow_mns45}'
+    where CAST(dis.Crtd_DateTime as date) >= '{datenow_mns45}'
     """
     df = get_ms_df(sql)
     df.columns = lower_col(df)
@@ -783,7 +783,7 @@ def update_sync_dms_orddisc():
     print("delete_sql: ", del_sql)
     execute_bq_query(del_sql)
     #df6.shape
-    bq_values_insert(df6, table_name, 2, chunksize=None)
+    bq_values_insert(df6, table_name, 2)
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
