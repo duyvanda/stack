@@ -93,7 +93,7 @@ def update_khsx_nhamay():
        'thangtruocchuyensang', 'poton', 'podathang', 'pobosung', 'tong',
        'phanbothuchien','conton']].copy()
     
-    df1['month']=pd.to_datetime(df1['month'], format="%Y%m%d")
+    df1['month']=pd.to_datetime(df1['month'], format="%Y-%m-%d")
     df_old['month']=pd.to_datetime(df_old['month'])
     df_old=dropdup(df_old,3,subset=['masanphamphanam','month'])
     df1=pd.merge(df1,df_old,how='left', on=['masanphamphanam','month'])
