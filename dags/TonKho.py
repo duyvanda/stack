@@ -190,11 +190,13 @@ def tonkho():
 
     df5 = pivot(df4, grouplst, agg_dict)
 
-    df5.head()
+    # df5.head()
 
     df5.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF5.pickle')
 
     # df5.dtypes
+
+    df5.chinhanh.fillna("NA", inplace=True)
 
     assert checkdup(df5,1,['masanpham','chinhanh']).sum() == 0, "MSP & Chi Nhanh khong duoc trung"
 
@@ -238,6 +240,7 @@ def tonkho():
     df5 = union_all([df5, _df])
     df5 = pivot(df5, ['masanpham', 'tensanpham', 'donvi', 'chinhanh', 'songaynhan'], {'tonao':np.sum, 'tonhangdiduong':np.sum, 'toncn':np.sum, 'tonhcm':np.sum, 'tonmerap':np.sum, 'tonvime':np.sum, 'toncn_huy':np.sum, 'tonhcm_huy':np.sum})
 
+    df5.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF5_HDDURL.pickle')
 
     assert checkdup(df5,1,['masanpham','chinhanh']).sum() == 0, "MSP & Chi Nhanh khong duoc trung"
 
@@ -362,6 +365,7 @@ def tonkho():
         'tonmerap', 'tonvime', 'toncn_huy', 'tonhcm_huy', 'tonnmtp', 'tonnmbt', 'tonnmhh', 'tonnmpo', 'tonnmno']]
 
     # NM.to_clipboard()
+    NM.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'NM.pickle')
 
     df5['tonnmtp'] = 0
     df5['tonnmbt'] = 0
