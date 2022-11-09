@@ -158,6 +158,7 @@ def tonkho():
     huy_lst_hcm = ['WH0032']
     dk5 = df4['makho'].isin(huy_lst_cn)
     dk6 = df4['makho'].isin(huy_lst_hcm)
+    dk7 = df4['phanloaicn'] == "ECE"
 
 
 
@@ -168,6 +169,7 @@ def tonkho():
     df4['tonvime'] = np.where(dk4, df4['toncuoi'], 0)
     df4['toncn_huy'] = np.where(dk5, df4['toncuoi'], 0)
     df4['tonhcm_huy'] = np.where(dk6, df4['toncuoi'], 0)
+    df4['tonece'] = np.where(dk7, df4['toncuoi'], 0)
 
     df4.to_csv(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF4.csv', index=False)
 
@@ -183,6 +185,7 @@ def tonkho():
     'tonvime':np.sum,
     'toncn_huy':np.sum,
     'tonhcm_huy':np.sum,
+    'tonece':np.sum,
     }
 
     df4.donvi = np.where(df4.donvi == 'Hộp', 'HOP', df4.donvi)
@@ -197,6 +200,8 @@ def tonkho():
     # df5.dtypes
 
     df5.chinhanh.fillna("NA", inplace=True)
+
+    df5[checkdup(df5,2,['masanpham','chinhanh'])].to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF5_Dup.pickle')
 
     assert checkdup(df5,1,['masanpham','chinhanh']).sum() == 0, "MSP & Chi Nhanh khong duoc trung"
 
@@ -234,11 +239,12 @@ def tonkho():
     _df['tonvime'] = 0
     _df['toncn_huy'] = 0
     _df['tonhcm_huy'] = 0
+    _df['tonece'] = 0
 
-    _df.columns = ['masanpham','chinhanh','tonhangdiduong','tensanpham','donvi','songaynhan','tonao','toncn','tonhcm','tonmerap','tonvime', 'toncn_huy', 'tonhcm_huy']
-    _df = _df[['masanpham', 'tensanpham', 'donvi', 'chinhanh', 'songaynhan', 'tonao', 'tonhangdiduong', 'toncn', 'tonhcm', 'tonmerap', 'tonvime', 'toncn_huy', 'tonhcm_huy']]
+    _df.columns = ['masanpham','chinhanh','tonhangdiduong','tensanpham','donvi','songaynhan','tonao','toncn','tonhcm','tonmerap','tonvime', 'toncn_huy', 'tonhcm_huy', 'tonece']
+    _df = _df[['masanpham', 'tensanpham', 'donvi', 'chinhanh', 'songaynhan', 'tonao', 'tonhangdiduong', 'toncn', 'tonhcm', 'tonmerap', 'tonvime', 'toncn_huy', 'tonhcm_huy', 'tonece']]
     df5 = union_all([df5, _df])
-    df5 = pivot(df5, ['masanpham', 'tensanpham', 'donvi', 'chinhanh', 'songaynhan'], {'tonao':np.sum, 'tonhangdiduong':np.sum, 'toncn':np.sum, 'tonhcm':np.sum, 'tonmerap':np.sum, 'tonvime':np.sum, 'toncn_huy':np.sum, 'tonhcm_huy':np.sum})
+    df5 = pivot(df5, ['masanpham', 'tensanpham', 'donvi', 'chinhanh', 'songaynhan'], {'tonao':np.sum, 'tonhangdiduong':np.sum, 'toncn':np.sum, 'tonhcm':np.sum, 'tonmerap':np.sum, 'tonvime':np.sum, 'toncn_huy':np.sum, 'tonhcm_huy':np.sum, 'tonece':np.sum})
 
     df5.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF5_HDDURL.pickle')
 
@@ -360,9 +366,10 @@ def tonkho():
     NM['tonvime'] = 0
     NM['toncn_huy'] = 0
     NM['tonhcm_huy'] = 0
+    NM['tonece'] = 0
 
     NM = NM[['masanpham', 'tensanpham', 'donvi', 'chinhanh', 'songaynhan', 'tonao', 'tonhangdiduong', 'toncn', 'tonhcm',
-        'tonmerap', 'tonvime', 'toncn_huy', 'tonhcm_huy', 'tonnmtp', 'tonnmbt', 'tonnmhh', 'tonnmpo', 'tonnmno']]
+        'tonmerap', 'tonvime', 'toncn_huy', 'tonhcm_huy', 'tonece', 'tonnmtp', 'tonnmbt', 'tonnmhh', 'tonnmpo', 'tonnmno']]
 
     # NM.to_clipboard()
     NM.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'NM.pickle')
@@ -463,7 +470,7 @@ def tonkho():
     # điều kiện input
 def update_tonkho():
     dk  = datetime.now().strftime("%H:%M") in {'11:00','12:00','15:00','23:45'}
-    # dk = True
+    dk = True
     if dk: tonkho()
     else: print("Not a good time", datetime.now().strftime("%H:%M"))
 # End

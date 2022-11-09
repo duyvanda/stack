@@ -30,8 +30,8 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '@once',
-          tags=[prefix+name, 'update', 'once']
+          schedule_interval= '@hourly',
+          tags=[prefix+name, 'update', 'hourly']
 )
 
 # %%

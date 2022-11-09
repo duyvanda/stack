@@ -37,7 +37,7 @@ dag = DAG(prefix+name,
 
 # %%
 data1 = {"from":1643652037221,"to":1656608154405}
-data2 = {"from": 1656612054988, "to": 1667235316382}
+data2 = {"from": 1656612054988, "to": 1672505977905}
 list_dict = [data1, data2]
 list_pickle_pathname = [csv_path+"part1.pickle", csv_path+"part2.pickle"]
 
@@ -47,11 +47,11 @@ def get_data(pickle_pathname: str, data: dict):
     headers['authority'] = 'web11.caresoft.vn'
     headers['accept'] = 'application/json, text/plain, */*'
     headers['content-type'] = 'application/json;charset=UTF-8'
-    headers['cookie'] = '_fbp=fb.1.1663812395640.118225221; _ga=GA1.1.296298468.1663812395; remember_82e5d2c56bdd0811318f0cf078b78bfc=eyJpdiI6ImEzOVhXYUpKZ0xaTzJWbWtPXC9rVGNnPT0iLCJ2YWx1ZSI6Ikt1ZnlYVVJldzJwMllQTUhpVkVcL0dnWHV6dG1UKzl1VWFCN2gxTm1ka0UrXC9LOWpsM3VzNDZyeEtkXC9oTW83MHlaQ0dKU3NkQU5tUmdNZ2VOYVgrS0hkSGdOcEFKdWRGa1Z0OTdaR0VZa293PSIsIm1hYyI6ImU2OWVlMzU3MWM5OTExZjc3NGRmYWZkZmMyZjU3NzQ5ODVjODMwMGE2ODMwOGRmMDlmYWY1MWRkZWYxNzhlOTkifQ%3D%3D; _ga_TXHEXQXK1P=GS1.1.1666680497.4.1.1666682046.0.0.0; laravel_session=eyJpdiI6IjIrUWZoMkUxS05ZeEdsSVYzRUxGTlE9PSIsInZhbHVlIjoiSm9zaGlubG9ZaTk2SVZqdkpMZlVsbUdxZ2gzd0ZQbW5XK3Mxbkh5ZmR1NDg4S1JlMGNhM2t5RmNNUUJXV1lSYUZQQ245WGF2ck1hNzZGaWE5M0laUUE9PSIsIm1hYyI6ImI3Yzc5YTk3ZGU2YmVjNWM2NzA4MmU5ZTBmZjFhN2E0ZjZlM2Y5NTBiNzcyMTJmODgzYzFkNDgzZTI0NDFlZjcifQ%3D%3D'
+    headers['cookie'] = '_fbp=fb.1.1663812395640.118225221; _ga=GA1.1.296298468.1663812395; remember_82e5d2c56bdd0811318f0cf078b78bfc=eyJpdiI6ImEzOVhXYUpKZ0xaTzJWbWtPXC9rVGNnPT0iLCJ2YWx1ZSI6Ikt1ZnlYVVJldzJwMllQTUhpVkVcL0dnWHV6dG1UKzl1VWFCN2gxTm1ka0UrXC9LOWpsM3VzNDZyeEtkXC9oTW83MHlaQ0dKU3NkQU5tUmdNZ2VOYVgrS0hkSGdOcEFKdWRGa1Z0OTdaR0VZa293PSIsIm1hYyI6ImU2OWVlMzU3MWM5OTExZjc3NGRmYWZkZmMyZjU3NzQ5ODVjODMwMGE2ODMwOGRmMDlmYWY1MWRkZWYxNzhlOTkifQ%3D%3D; _ga_TXHEXQXK1P=GS1.1.1666680497.4.1.1666682046.0.0.0; laravel_session=eyJpdiI6IndqSWdlV2ZtQTZjdUJiM3RKOXlRM2c9PSIsInZhbHVlIjoiZ2ZrSmZscERIaVBMekM3MXlVa08za2xKWmJhR3dDMEFQOTBrMXcreitXQWxBSEhyaHFIUFA3WUExd002cXpTbG5RYnhiZUN2b3hNSGJXZkRubHJLU1E9PSIsIm1hYyI6IjdiYzc0MTFkNzExZDlkMWQxNGI5M2RmZDQ4MjE1N2FiOWVhOWM4ZDY2ZmM4NWM0YTdkNTg2M2Y5ZDRhMmFhYmEifQ%3D%3D'
     headers['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
     resp = requests.post(url, headers=headers, json=data)
     print("resp ", resp.json())
-    time.sleep(2)
+    time.sleep(2)   
     df = pd.read_excel(resp.json()['status']['extraData']['urlToFile'], dtype={'Số điện thoại chính': str, 'Số điện thoại phụ 1': str})
     df.columns = cleancols(df)
     df.columns = lower_col(df)

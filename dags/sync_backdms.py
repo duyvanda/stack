@@ -785,6 +785,52 @@ def update_sync_dms_orddisc():
     #df6.shape
     bq_values_insert(df6, table_name, 2)
 
+
+def update_sync_dms_omapiviettelsecrekey():
+    from_tb = "OM_APIViettelSecretKey"
+    # from_tb2 = "OM_DeliReportDet"
+    table_name = "sync_dms_omapiviettelsecretkey"
+    table_temp = "sync_dms_omapiviettelsecretkey_temp"
+    # pass
+    sql = \
+    f"""
+    DECLARE @from DATE = '{datenow_mns45}'
+    DECLARE @to DATE = '2022-01-31'
+    SELECT
+    CONCAT(BranchID,BatNbr) as pk,
+    BranchID,
+    BatNbr,
+    InvoiceNbr,
+    InvoiceNote,
+    TaxInvCode,
+    MTLoi,
+    Crtd_DateTime,
+    Crtd_User,
+    LUpd_DateTime,
+    LUpd_User
+    from {from_tb}
+    where
+    cast(Crtd_DateTime as DATE) >= @from
+    """
+    df = get_ms_df(sql)
+    df['inserted_at'] = datetime.now()
+    sql = \
+    f"""
+    delete from biteam.{table_name} where date(crtd_datetime) >= '{datenow_mns45}'
+    """
+    print("delete_sql: ", sql)
+    execute_bq_query(sql)
+    bq_values_insert(df, f"{table_name}", 2)
+
+    #recheck count *
+    statusbq_sql = \
+    f"""
+    SELECT count(*) as count from biteam.{table_name} where date(crtd_datetime) >= '{start_date}'
+    """
+    countbq = get_bq_df(statusbq_sql)
+    print(countbq)
+    ##
+
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
 update_sync_dms_pda_so = PythonOperator(task_id="update_sync_dms_pda_so", python_callable=update_sync_dms_pda_so, dag=dag)
@@ -811,7 +857,12 @@ update_sync_dms_lt = PythonOperator(task_id="update_sync_dms_lt", python_callabl
 
 update_sync_dms_orddisc = PythonOperator(task_id="update_sync_dms_orddisc", python_callable=update_sync_dms_orddisc, dag=dag)
 
+update_sync_dms_omapiviettelsecrekey = PythonOperator(task_id="update_sync_dms_omapiviettelsecrekey", python_callable=update_sync_dms_omapiviettelsecrekey, dag=dag)
+
+dummy_start2 = DummyOperator(task_id="dummy_start2", dag=dag)
+
 dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
 
 dummy_start >> [update_sync_dms_pda_so, update_sync_dms_so, update_sync_dms_ib, update_sync_dms_dv] >> dummy_start1
-dummy_start1 >> [update_sync_dms_pda_sod, update_sync_dms_sod, update_sync_dms_ibd, update_sync_dms_iv, update_sync_dms_err,update_sync_dms_lt,update_sync_dms_orddisc] >> dummy_end
+dummy_start1 >> [update_sync_dms_pda_sod, update_sync_dms_sod, update_sync_dms_ibd, update_sync_dms_iv, update_sync_dms_err,update_sync_dms_lt,update_sync_dms_orddisc] >> dummy_start2
+dummy_start2 >> update_sync_dms_omapiviettelsecrekey>> dummy_end

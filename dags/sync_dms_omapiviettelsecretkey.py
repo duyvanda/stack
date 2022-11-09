@@ -98,7 +98,7 @@ def update():
 def insert():
     dmssql = \
     f"""
-    select CONCAT(BranchID,BatNbr,AdjdRefNbr,AdjgRefNbr) as pk from {from_tb} where cast (Crtd_DateTime as date ) >= '{date_ms45}'
+    select CONCAT(BranchID,BatNbr) as pk from {from_tb} where cast (Crtd_DateTime as date ) >= '{date_ms45}'
     """
     dfdms =  get_ms_df(dmssql)
     a = set(dfdms.pk.to_list())
@@ -125,7 +125,7 @@ insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
 
 update = PythonOperator(task_id="update", python_callable=update, dag=dag)
 
-update_sync_dms_ardoc_2 = PythonOperator(task_id="update_sync_dms_ardoc_2", python_callable=update_sync_dms_ardoc_2, dag=dag)
+# update_sync_dms_ardoc_2 = PythonOperator(task_id="update_sync_dms_ardoc_2", python_callable=update_sync_dms_ardoc_2, dag=dag)
 
 dummy_start >> update >> insert
 
