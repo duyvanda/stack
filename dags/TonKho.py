@@ -464,13 +464,16 @@ def tonkho():
     execute_values_insert(df6,'f_sc_daily_invt')
 
     df6['inserted_at2'] = datetime.now()
+    df6.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'df6.pickle')
+    df.songaynhan = df.songaynhan.astype('float')
     bq_values_insert(df6, "f_sc_daily_invt", 2)
+    
     execute_bq_query("""call `spatial-vision-343005.view_report.f_tonkhotonghop_daily`();""")
 
     # điều kiện input
 def update_tonkho():
     dk  = datetime.now().strftime("%H:%M") in {'11:00','12:00','15:00','23:45'}
-    dk = True
+    # dk = True
     if dk: tonkho()
     else: print("Not a good time", datetime.now().strftime("%H:%M"))
 # End

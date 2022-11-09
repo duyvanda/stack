@@ -75,7 +75,7 @@ def get_files():
     # csv_path+f'{prefix}{name}/F_TrackingDebt_INS.csv', index=False
     # df1.head()
 
-    assert checkdup(df1, 2, ['ChiNhanh', 'YCRH','MaSanPham']).sum() == 0, "Duplicate found"
+    # assert checkdup(df1, 2, ['ChiNhanh', 'YCRH','MaSanPham']).sum() == 0, "Duplicate found"
 
     sql_2 = \
     """
