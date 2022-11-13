@@ -24,9 +24,9 @@ dag_params = {
     # 'email_on_retry': False,
     # 'email':['duyvq@merapgroup.com', 'vanquangduy10@gmail.com'],
     'do_xcom_push': False,
-    'execution_timeout':timedelta(seconds=300)
-    # 'retries': 3,
-    # 'retry_delay': timedelta(minutes=10),
+    'execution_timeout':timedelta(seconds=300),
+    'retries': 3,
+    'retry_delay': timedelta(seconds=10),
 }
 
 dag = DAG(prefix+name,
@@ -106,10 +106,12 @@ dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
 dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
 
+get_ck = PythonOperator(task_id="get_ck", python_callable=get_ck, dag=dag)
+
 get_pickle = PythonOperator(task_id="get_pickle", python_callable=get_pickle, dag=dag)
 
 insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
 
-dummy_start >> get_pickle >> insert >> dummy_end
+dummy_start >> get_ck >> get_pickle >> insert >> dummy_end
 
 

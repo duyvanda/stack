@@ -465,7 +465,7 @@ def tonkho():
 
     df6['inserted_at2'] = datetime.now()
     df6.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'df6.pickle')
-    df.songaynhan = df.songaynhan.astype('float')
+    df6.songaynhan = df6.songaynhan.astype('float')
     bq_values_insert(df6, "f_sc_daily_invt", 2)
     
     execute_bq_query("""call `spatial-vision-343005.view_report.f_tonkhotonghop_daily`();""")

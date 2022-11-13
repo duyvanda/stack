@@ -73,9 +73,16 @@ makhcu,
 tenkhachhang,
 tentinhkh,
 makenhphu,
-masanpham,
+-- Thay ma san pham moi
+Case when masanpham ='OH053' then 'OH087'
+     when masanpham ='OH056' then 'OH086'
+     when masanpham ='OH073' then 'OH088'
+else masanpham end as masanpham,
 tensanphamviettat,
-tensanphamnb,
+Case when masanpham ='OH053' then 'Xypenat NL 75ml'
+     when masanpham ='OH056' then 'Xypenat NL 30ml'
+     when masanpham ='OH073' then 'Xypenat TE 30ml' 
+else tensanphamnb end as tensanphamnb,
 soluong,
 doanhsochuavat,
 phanloaispcl,
@@ -97,7 +104,9 @@ AND EXTRACT(year from thang) >= 2022
 
 result_h_data as (
 
-SELECT month,year,masanpham,tensanphamnb,makenhkh,data_type,monthname,sum(soluong) as soluong,sum(doanhsochuavat) as doanhsochuavat from h_data GROUP BY month,year,masanpham,tensanphamnb,makenhkh,data_type,monthname),
+SELECT month,year,masanpham,tensanphamnb,makenhkh,data_type,monthname,sum(soluong) as soluong,sum(doanhsochuavat) as doanhsochuavat 
+from h_data
+ GROUP BY month,year,masanpham,tensanphamnb,makenhkh,data_type,monthname),
 
 sale_days as (
 with songay as ( SELECT *,
@@ -138,7 +147,13 @@ else a.soluong end as avg_soluong_cacthangtruoc,
 a.soluong as soluong_mtd
 from result_h_data a
 LEFT JOIN sale_days b on a.month = b.month and a.year = b.year
-LEFT JOIN ( SELECT masanpham,tensanphamnb,makenhkh,data_type,round(avg(soluong),0) as soluong, round(avg(doanhsochuavat),0) as doanhsochuavat  from result_h_data where year = EXTRACT(year from (select * from `biteam.d_current_table`)) and month < EXTRACT(month from (select * from `biteam.d_current_table`)) GROUP BY masanpham,tensanphamnb,makenhkh,data_type ) c on concat(c.masanpham,c.tensanphamnb,c.makenhkh,c.data_type) = concat(a.masanpham,a.tensanphamnb,a.makenhkh,a.data_type)
+LEFT JOIN 
+( SELECT masanpham,tensanphamnb,makenhkh,data_type,round(avg(soluong),0) as soluong, round(avg(doanhsochuavat),0) as doanhsochuavat 
+ from result_h_data 
+ where year = EXTRACT(year from (select * from `biteam.d_current_table`)) and month < EXTRACT(month from (select * from `biteam.d_current_table`)) 
+GROUP BY masanpham,tensanphamnb,makenhkh,data_type ) c 
+
+on concat(c.masanpham,c.tensanphamnb,c.makenhkh,c.data_type) = concat(a.masanpham,a.tensanphamnb,a.makenhkh,a.data_type)
 ORDER BY a.masanpham,a.makenhkh,a.month
 
 '''
