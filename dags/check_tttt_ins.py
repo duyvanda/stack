@@ -72,6 +72,7 @@ SELECT a.manv,
 Case when a.manv ='MR0292' then 'Đỗ Thị Hồng Thủy' 
         when a.manv ='MR2629' then 'Nguyễn Thị Mỹ Thanh'
         when a.manv ='MR1432' then 'Lương Tấn Khả'
+        when a.manv ='MR2663' then 'Hà Bảo Châu'
 else
 c.tencvbh end as tennhanvien,a.makhcu,d.custname as tenkhachhang,
 a.thongtinthanhtoan,a.giaiphap,a.thoigiangoi,a.input_name

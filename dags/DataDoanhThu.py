@@ -14,6 +14,7 @@ name='DataDoanhThu'
 prefix='Debt_'
 csv_path = '/usr/local/airflow/plugins'+'/'
 path = '/usr/local/airflow/dags/files/csv_congno/'
+pk_path = '/usr/local/airflow/plugins/Debt_DataDoanhThuPickles/'
 
 dag_params = {
     'owner': 'airflow',
@@ -41,12 +42,12 @@ def update_table():
 # transform
 
 def etl_to_postgres():
-    if datetime.now().hour in {8,9,10,11,12,13,14,15,16,17,18,21,23}:
+    if True:
         # day_ago = 3
-        datenow = datetime.now().strftime("%Y%m%d")
-        # datenow_day_ago = ( datetime.now()-timedelta(day_ago) ).strftime("%Y%m%d")
+        datenow = datetime.now().strftime("%Y-%m-%d")
+        datenow_7day_ago = ( datetime.now()-timedelta(6) ).strftime("%Y-%m-%d")
         # param_1 = f"'{datenow_day_ago}'"
-        Fromdate = '20160101'
+        Fromdate = datenow_7day_ago
         Todate = datenow
         print(Fromdate, Todate)
 
@@ -68,8 +69,6 @@ def etl_to_postgres():
         WHERE co.OrderType IN ( 'CO', 'HK' )
             AND ino.OrderType IN ( 'IN', 'IO', 'EP', 'NP' )
             AND co.Status = 'C'
-            AND CAST(co.OrderDate AS DATE)
-            BETWEEN '{Fromdate}' AND '{Todate}';
         """
 
         WithOutOrderNbr = get_ms_df(WithOutOrderNbr_sql)
@@ -157,7 +156,9 @@ def etl_to_postgres():
             --   AND woo.OrigOrderNbr IS NULL
                 AND CAST(sod.OrderDate AS DATE) < '20210501'
         """
-        UNION1 = get_ms_df(UNION1_sql)
+        UNION1_p1 = get_ms_df(UNION1_sql)
+        UNION1_p0 = pd.read_pickle(pk_path+'UNION1.pk')
+        UNION1 = union_all([UNION1_p0, UNION1_p1])
 
         lst = UNION1.columns
         UNION1 = UNION1.merge(WithOutOrderNbr, how='left', left_on=['BranchID','OrderNbr'], right_on=['BranchID','OrigOrderNbr'])
@@ -240,7 +241,10 @@ def etl_to_postgres():
         AND sod.Status = 'C'
         --   AND woo.OrigOrderNbr IS NULL
         """
-        UNION2 = get_ms_df(UNION2_sql)
+        
+        UNION2_p1 = get_ms_df(UNION2_sql)
+        UNION2_p0 = pd.read_pickle(pk_path+'UNION2.pk')
+        UNION2 = union_all([UNION2_p0, UNION2_p1])
 
         lst = UNION2.columns
         UNION2 = UNION2.merge(WithOutOrderNbr, how='left', left_on=['BranchID','OrderNbr'], right_on=['BranchID','OrigOrderNbr'])
@@ -333,7 +337,10 @@ def etl_to_postgres():
         -- AND woo.OrigOrderNbr IS NULL
         -- AND rod.OrigOrderNbr IS NULL
         """
-        UNION3 = get_ms_df(UNION3_sql)
+
+        UNION3_p1 = get_ms_df(UNION3_sql)
+        UNION3_p0 = pd.read_pickle(pk_path+'UNION3.pk')
+        UNION3 = union_all([UNION3_p0, UNION3_p1])
 
         lst = UNION3.columns
         UNION3 = UNION3.merge(WithOutOrderNbr, how='left', left_on=['BranchID','OrderNbr'], right_on=['BranchID','OrigOrderNbr'])
@@ -438,7 +445,10 @@ def etl_to_postgres():
         -- AND woo.OrigOrderNbr IS NULL
         -- AND rod.OrigOrderNbr IS NULL
         """
-        UNION4 = get_ms_df(UNION4_sql)
+        
+        UNION4_p1 = get_ms_df(UNION4_sql)
+        UNION4_p0 = pd.read_pickle(pk_path+'UNION4.pk')
+        UNION4 = union_all([UNION4_p0, UNION4_p1])
 
         lst = UNION4.columns
         UNION4 = UNION4.merge(WithOutOrderNbr, how='left', left_on=['BranchID','OrderNbr'], right_on=['BranchID','OrigOrderNbr'])
@@ -541,8 +551,6 @@ def etl_to_postgres():
         -- LEFT JOIN #WithOutOrderNbr woo WITH (NOLOCK)
         --     ON woo.BranchID = ord.BranchID
         --        AND woo.OrigOrderNbr = ord.OrderNbr
-        WHERE CAST(d.ReturnDate AS DATE)
-        BETWEEN '{Fromdate}' AND '{Todate}'
         AND sod.Status = 'C'
         --   AND woo.OrigOrderNbr IS NULL
         """
@@ -658,7 +666,10 @@ def etl_to_postgres():
                 --   AND woo.OrigOrderNbr IS NULL
                 --   AND rto.INOrderNbr IS NULL
         """
-        UNION6 = get_ms_df(UNION6_sql)
+        
+        UNION6_p1 = get_ms_df(UNION6_sql)
+        UNION6_p0 = pd.read_pickle(pk_path+'UNION6.pk')
+        UNION6 = union_all([UNION6_p0, UNION6_p1])
 
         lst = UNION6.columns
         UNION6 = UNION6.merge(WithOutOrderNbr, how='left', left_on=['BranchID','OrderNbr'], right_on=['BranchID','OrigOrderNbr'])
@@ -773,7 +784,10 @@ def etl_to_postgres():
         -- AND woo.OrigOrderNbr IS NULL
         -- AND rto.INOrderNbr IS NULL
         """
-        UNION7 = get_ms_df(UNION7_sql)
+        
+        UNION7_p1 = get_ms_df(UNION7_sql)
+        UNION7_p0 = pd.read_pickle(pk_path+'UNION7.pk')
+        UNION7 = union_all([UNION7_p0, UNION7_p1])
 
         lst = UNION7.columns
         UNION7 = UNION7.merge(WithOutOrderNbr, how='left', left_on=['BranchID','OrderNbr'], right_on=['BranchID','OrigOrderNbr'])
@@ -1380,20 +1394,12 @@ def etl_to_postgres():
         o.DueDate = np.where(o.DueDate_y.isna(), o.DueDate, o.DueDate_y)
         drop_cols(o, ['DueDate_y'])
         
-        # dk1 = o.OrderNbr == 'DH122018-17643'
-        # dk2 = o.BranchID == 'MR0001'
-        # o.DebtInCharge = np.where(dk1&dk2, "CS", o.DebtInCharge)
-        # o.to_csv(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'Duy.csv', index=False)
-        # PART 2
-        #Input to INS talbe
-        df1 = o.copy()
-        dkins = o.SubChannel.isin(["INS1","INS2","INS3"])
-        o[dkins].to_csv(csv_path+f'{prefix}{name}/F_TrackingDebt_INS.csv', index=False)
-        # dkk = df1.SubChannel.isin(["INS1","INS2","INS3"])
-        # df1a = df1[dkk].copy()
-        # bq_values_insert(df1a, "f_tracking_debt_ins", 3)
-        ##
+        dk1 = o.OrderNbr == 'DH122018-17643'
+        dk2 = o.BranchID == 'MR0001'
+        o.DebtInCharge = np.where(dk1&dk2, "CS", o.DebtInCharge)
 
+        # PART 2
+        df1 = o.copy()
  
         df_nhansu = get_bq_df("select * from biteam.d_nhan_su")
         df_nhansu['qlkhuvuc'] = df_nhansu['qlkhuvuc'].str.strip()
@@ -1569,30 +1575,37 @@ def etl_to_postgres():
         
         df2[ checkdup(df2, 2, ['OrderNbr', 'BranchID', 'DateOfOrder', 'DueDate']) ].to_csv("CongNo_CheckDup.csv")
 
-        df2.to_csv(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'F_TrackingDebt_BI.csv', index=False)
+        df2.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'F_TrackingDebt_BI.pk')
         # commit_psql("truncate table f_tracking_debt cascade;")
         # execute_values_upsert(df2, 'f_tracking_debt', primary_keys)
         # rows = list(df2.itertuples(index=False, name=None))
     else: print("Not this time then")
 
 def truncate():
-    pass
+    if datetime.now().hour in {7,8,9,10,11,12,13,14,15,16,17,18,21,23}:
+        commit_psql("truncate table f_tracking_debt cascade;")
 
 
 def insert():
-    datenow = datetime.now().strftime("%Y%m%d")
-    if datetime.now().hour in {8,9,10,11,12,13,14,15,16,17,18,21,23}:
-        df2 = pd.read_csv(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'F_TrackingDebt_BI.csv')
+    datenow = datetime.now().strftime("%Y-%m-%d")
+    print("datenow ok")
+    if datetime.now().hour in {7,8,9,10,11,12,13,14,15,16,17,18,21,23}:
+        df2 = pd.read_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'F_TrackingDebt_BI.pk')
+        print("read pickle ok")
+        print("df shape", df2.shape)
         dk = df2.tiennocongty > 1000
         df2 = df2[dk].copy()
-        df2.DateOfOrder = convert_to_datetime(df2.DateOfOrder)
-        df2.DueDate = convert_to_datetime(df2.DueDate)
-        df2.deli_last_updated = pd.to_datetime(df2.deli_last_updated, dayfirst=True)
+        #df2.DateOfOrder = convert_to_datetime(df2.DateOfOrder)
+        #df2.DueDate = convert_to_datetime(df2.DueDate)
+        #df2.deli_last_updated = pd.to_datetime(df2.deli_last_updated, dayfirst=True)
+        
         # dk1=df2['SubChannel'].isin("")
         # dk2=True
 
         # *------------------*
         #24032022
+        
+        print("debug1")
         df2.columns = lower_col(df2)
         dk1 = df2.subchannel.isin(["NT","PK","SI"])
         dk2 = df2.paymentsform == "TM"
@@ -1605,7 +1618,8 @@ def insert():
         dk6 = df2.subchannel.isin(["INS1","INS2","INS3"])
         df2['debtincharge_v2']=np.where(dkfinal1 | dkfinal2, "MDS", \
             np.where(dk6, "INS", "CS"))
-        
+        # *------------------*
+        print("debug2")
         dk1 = df2.ordernbr == 'DH122018-17643'
         dk2 = df2.branchid == 'MR0001'
         df2.debtincharge_v2 = np.where(dk1&dk2, "CS", df2.debtincharge_v2)
@@ -1616,22 +1630,13 @@ def insert():
         dk2 = df2.branchid == 'MR0003'
         df2.debtincharge_v2 = np.where(dk1&dk2, "CS", df2.debtincharge_v2)
         #
-        
+
         df2['inserted_at'] = datetime.now()
         # BQ first 
         bq_values_insert(df2, "f_tracking_debt", 3)
-        # primary_keys=['ordernbr', 'branchid', 'dateoforder', 'duedate']
-        # execute_values_upsert(df2, 'f_tracking_debt', primary_keys)
+        primary_keys=['ordernbr', 'branchid', 'dateoforder', 'duedate']
+        execute_values_upsert(df2, 'f_tracking_debt', primary_keys)
 
-
-def insert_ins():
-    df_ins = pd.read_csv(csv_path+f'{prefix}{name}/F_TrackingDebt_INS.csv')
-    bq_values_insert(df_ins, "f_tracking_debt_ins", 3)
-
-
-# def truncate_ins():
-#     if datetime.now().hour in {8,9,10,11,12,13,14,15,16,17,18,21,23}:
-#         commit_psql("truncate table f_tracking_debt_ins cascade;")
 
 
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
@@ -1644,12 +1649,11 @@ truncate = PythonOperator(task_id="truncate", python_callable=truncate, dag=dag,
 
 insert = PythonOperator(task_id="insert", python_callable=insert, dag=dag)
 
-insert_ins = PythonOperator(task_id="insert_ins", python_callable=insert_ins, dag=dag)
-
-
 
 # tab_refresh = TableauRefreshWorkbookOperator(task_id='tab_refresh', workbook_name='Báo Cáo Doanh Thu Công Nợ', dag=dag)
 
 
-dummy_start >> py_update_table >> py_etl_to_postgres >> truncate >> insert >> insert_ins
+dummy_start >> py_update_table >> py_etl_to_postgres >> truncate >> insert
+# >> py_update_table >> py_etl_to_postgres >> truncate 
+
 # >> tab_refresh

@@ -117,6 +117,7 @@ def tonkho_hsd():
     # điều kiện input
 def update_tonkho_hds():
     dk  = datetime.now().strftime("%H:%M") in {'11:10','12:10','16:40','23:50'}
+    # dk = True
     if dk: tonkho_hsd()
     else: print("Not a good time", datetime.now().strftime("%H:%M"))
 # End
