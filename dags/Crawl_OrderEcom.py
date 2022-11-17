@@ -114,6 +114,9 @@ def mass_update():
         headers['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
         resp = requests.get(url, headers=headers)
         df = pd.DataFrame(resp.json()['data'])
+        df['inserted_at'] = datetime.now()
+        df.created_at = pd.to_datetime(df.created_at)
+        df.delivery_date = pd.to_datetime(df.delivery_date)
         execute_bq_query(f""" DELETE FROM biteam.f_crawl_orderecommerce where date(created_at) >={datemn_90} """)
         bq_values_insert(df, "f_crawl_orderecommerce", 2)
     else:
@@ -128,4 +131,4 @@ get_data = PythonOperator(task_id="get_data", python_callable=get_data, dag=dag)
 upsert = PythonOperator(task_id="upsert", python_callable=upsert, dag=dag)
 mass_update = PythonOperator(task_id="mass_update", python_callable=mass_update, dag=dag)
 
-dummy_start >> get_date >> get_data >> upsert
+dummy_start >> get_date >> get_data >> upsert >> mass_update
