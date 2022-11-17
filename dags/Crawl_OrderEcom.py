@@ -117,7 +117,7 @@ def mass_update():
         df['inserted_at'] = datetime.now()
         df.created_at = pd.to_datetime(df.created_at)
         df.delivery_date = pd.to_datetime(df.delivery_date)
-        execute_bq_query(f""" DELETE FROM biteam.f_crawl_orderecommerce where date(created_at) >={datemn_90} """)
+        execute_bq_query(f""" DELETE FROM biteam.f_crawl_orderecommerce where date(created_at) >='{datemn_90}' """)
         bq_values_insert(df, "f_crawl_orderecommerce", 2)
     else:
         print("NOT A GOOD TIME")
