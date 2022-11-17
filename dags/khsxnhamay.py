@@ -28,7 +28,7 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '30 23 * * *',
+          schedule_interval= '50 23 * * 2',
           tags=[prefix+name, 'Daily']
 )
 
@@ -102,6 +102,7 @@ def update_khsx_nhamay():
     
     #datenow_1dago = datetime.now().replace(hour=23,minute=30) - timedelta(days=1)
 
+
     df1['inserted_at'] = datetime.now()
     tonchuanhap['inserted_at'] = datetime.now()
     songaynhapkho['inserted_at'] = datetime.now()
@@ -112,6 +113,15 @@ def update_khsx_nhamay():
     bq_values_insert(songaynhapkho,"d_nm_songaynhapkho",3)
     bq_values_insert(quycachdh,"d_sc_quycachdh",3)
     execute_bq_query("""CALL view_report.f_tonkhotonghop_daily();""")
+
+    insert_sql = \
+    """
+    INSERT INTO biteam.f_kehoachsx_capture_t3
+    select * from view_report.f_kehoachsx_capture_t3 where week_day = 3 and day= current_date("+7")
+    """
+
+    execute_bq_query(insert_sql)
+
 # Dont Execute this
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 

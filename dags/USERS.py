@@ -39,7 +39,8 @@ def update_table():
     SELECT 
     --DISTINCT
     SlsperID as manv,
-    u.UserTypes as position,
+    u.UserTypes as usertypes,
+    u.Position as position,
     u.FirstName as tencvbh,
     SupID,
     sup.FirstName as tenquanlytt,
@@ -61,7 +62,8 @@ def update_table():
     SELECT 
     --DISTINCT
     SlsperID as manv,
-    u.UserTypes as position,
+    u.UserTypes as usertypes,
+    u.Position as position,
     u.FirstName as tencvbh,
     SupID,
     sup.FirstName as tenquanlytt,
