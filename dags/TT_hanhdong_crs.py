@@ -261,7 +261,8 @@ def sendmail(slsperid, tencvbh,thang_,thang_den,check_thang, so_kh_quydinh_vieng
         <p>    -   <b>{so_kh_viengtham_tt}</b> khách hàng là bạn viếng thăm trực tiếp.</p>
         <p>    -   <b>{sl_kh_phatsinhdh}</b> khách hàng phát sinh đơn hàng.</p>
         <p>    -   Tỉ lệ đơn hàng thực tế/số lần viếng thăm thực tế của bạn đến hiện tại là <b>{tile_dh}%</b>.</p>
-    <p>Để biết chi tiết vui lòng xem báo cáo ở link sau (Tab: Viếng thăm): <a href="https://datastudio.google.com/s/sIylagOiqCI">https://datastudio.google.com/s/sIylagOiqCI</a></p>
+    <p>Để biết chi tiết vui lòng xem báo cáo ở link sau: <a href="https://ds.merapgroup.com/">https://ds.merapgroup.com/</a></p>
+    <p>Đăng nhập tài khoản theo thông tin BI đã gửi qua email, vui lòng chọn: <h1 style="color:rgb(54, 38, 234); font-size:100%"> Báo cáo S | Sales Performance - Tab Viếng thăm (Tổng quan)</h1></p>
     <h1 style="color:rgb(234, 38, 38); font-size:100%"> Đây là tin nhắn tự động. Vui lòng không trả lời Email này!!!</h1>
     </body>
     </html>
