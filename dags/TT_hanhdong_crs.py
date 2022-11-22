@@ -75,29 +75,29 @@ where
 visitdate >='2022-08-01'
  )
 
-select distinct a.*,b.slsperid,d.tencvbh,
+select distinct a.*except (custid),a.custid as makhachhangdms,b.slsperid,d.tencvbh,
 b.mapping_date as thang_,
-Case when  date(thoihanhieulucgdpgpp) < (select * from `biteam.d_current_table`) 
+Case when  date(a.legaldate) < (select * from `biteam.d_current_table`) 
     then 1 else 0 end as is_hetthoihanhieuluc,
 Case when 
-     date_add((select * from `biteam.d_current_table`),interval 30 day) >= date(thoihanhieulucgdpgpp) 
-     and date(thoihanhieulucgdpgpp) > (select * from `biteam.d_current_table`) 
+     date_add((select * from `biteam.d_current_table`),interval 30 day) >= date(a.legaldate) 
+     and date(a.legaldate) > (select * from `biteam.d_current_table`) 
      then 1 else 0 end as is_saphetthoihanhieuluc,
-Case when  date(thoihanhieulucgdpgpp) < (select * from `biteam.d_current_table`) 
-    then makhachhangdms else null end as custid_hetthoihanhieuluc,
+Case when  date(a.legaldate) < (select * from `biteam.d_current_table`) 
+    then a.custid else null end as custid_hetthoihanhieuluc,
 Case when 
-     date_add((select * from `biteam.d_current_table`),interval 30 day) >= date(thoihanhieulucgdpgpp) 
-     and date(thoihanhieulucgdpgpp) > (select * from `biteam.d_current_table`) 
-     then makhachhangdms else null end as custid_saphetthoihanhieuluc,
-     c.custname,
+     date_add((select * from `biteam.d_current_table`),interval 30 day) >= date(a.legaldate) 
+     and date(a.legaldate) > (select * from `biteam.d_current_table`) 
+     then a.custid else null end as custid_saphetthoihanhieuluc,
+    --  c.custname,
      d.tenquanlytt,
      d.tenquanlykhuvuc,
      d.tenquanlyvung,
-     c.statedescr,
-     c.territorydescr
- from biteam.d_gpp a
-LEFT JOIN data_quydinh_viengtham b on a.makhachhangdms = b.custid 
-LEFT JOIN `biteam.d_master_khachhang` c on c.custid = a.makhachhangdms
+    --  c.statedescr,
+    --  c.territorydescr
+ from `biteam.d_master_khachhang` a
+LEFT JOIN data_quydinh_viengtham b on a.custid = b.custid 
+-- LEFT JOIN `biteam.d_master_khachhang` c on c.custid = a.makhachhangdms
 LEFT JOIN `biteam.d_users` d on d.manv =b.slsperid
 
 ),
@@ -216,7 +216,6 @@ result as (
 
   --and c.thang_ ='2022-09-01'
   --order by thang_ 
-
 
 
 """

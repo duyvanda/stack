@@ -6,7 +6,7 @@ from airflow.operators.python_operator import PythonOperator
 
 local_tz = pendulum.timezone("Asia/Bangkok")
 
-name='DELIHISTORY'
+name='DELIHISTORYC'
 prefix='SYNC_'
 csv_path = '/usr/local/airflow/plugins'+'/'
 

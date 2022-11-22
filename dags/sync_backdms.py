@@ -831,6 +831,83 @@ def update_sync_dms_omapiviettelsecrekey():
     print(countbq)
     ##
 
+
+def update_sync_dms_delihistory():
+
+    from_tb = "OM_DeliHistory"
+    from_tb2 = "OM_DeliHistory"
+    table_name = "sync_dms_delihistory"
+    table_temp = "sync_dms_delihistory_temp"
+
+    sql = \
+    f"""
+    DECLARE @from DATE = '{datenow_mns45}';
+    DECLARE @to DATE = '2022-01-01';
+    SELECT
+    REPLACE(CONCAT(BranchID, BatNbr,'-',OrderNbr,'-', CONVERT(varchar, ShipDate, 12),CONVERT(varchar, ShipDate, 24)),':','') as pk,
+    BranchID,
+    BatNbr,
+    OrderNbr,
+    SlsperID,
+    Reason,
+    [Status] as status,
+    a.Crtd_DateTime,
+    a.LUpd_DateTime,
+    b.Descr,
+    b.Note,
+    GETDATE() as inserted_at
+    from OM_DeliHistory a
+    LEFT JOIN OM_ReasonCodePPC b
+    on a.Reason =  b.Code
+    and b.Code <> '' and b.Type in('DELIOUTLET','DELIREJ','RENOTDEBT')
+    WHERE a.Status in ('A','D')
+    and cast(a.Crtd_DateTime as DATE) >= @from
+    """
+
+    df = get_ms_df(sql)
+    sql = \
+    f"""
+    delete from biteam.{table_name} where date(crtd_datetime) >= '{datenow_mns45}'
+    """
+    print("delete_sql: ", sql)
+    execute_bq_query(sql)
+    bq_values_insert(df, f"{table_name}", 2)
+    ##
+
+def update_sync_dms_delihistoryc():
+    table_name = "sync_dms_delihistoryc"
+    sql = \
+    f"""
+    DECLARE @from DATE = '{datenow_mns45}';
+    DECLARE @to DATE = '2022-01-01';
+    SELECT
+    REPLACE(CONCAT(BranchID, BatNbr,'-',OrderNbr,'-', CONVERT(varchar, ShipDate, 12),CONVERT(varchar, ShipDate, 24)),':','') as pk,
+    BranchID,
+    BatNbr,
+    OrderNbr,
+    SlsperID,
+    Reason,
+    [Status] as status,
+    a.Crtd_DateTime,
+    a.LUpd_DateTime,
+    a.LUpd_User,
+    GETDATE() as inserted_at
+    from OM_DeliHistory a
+    where a.Status = 'C'
+    and cast(a.Crtd_DateTime as DATE) >= @from
+    """
+
+    df = get_ms_df(sql)
+    sql = \
+    f"""
+    delete from biteam.{table_name} where date(crtd_datetime) >= '{datenow_mns45}'
+    """
+    print("delete_sql: ", sql)
+    execute_bq_query(sql)
+    bq_values_insert(df, f"{table_name}", 2)
+    ##
+
+
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
 update_sync_dms_pda_so = PythonOperator(task_id="update_sync_dms_pda_so", python_callable=update_sync_dms_pda_so, dag=dag)
@@ -859,10 +936,14 @@ update_sync_dms_orddisc = PythonOperator(task_id="update_sync_dms_orddisc", pyth
 
 update_sync_dms_omapiviettelsecrekey = PythonOperator(task_id="update_sync_dms_omapiviettelsecrekey", python_callable=update_sync_dms_omapiviettelsecrekey, dag=dag)
 
+update_sync_dms_delihistory = PythonOperator(task_id="update_sync_dms_delihistory", python_callable=update_sync_dms_delihistory, dag=dag)
+
+update_sync_dms_delihistoryc = PythonOperator(task_id="update_sync_dms_delihistoryc", python_callable=update_sync_dms_delihistoryc, dag=dag)
+
 dummy_start2 = DummyOperator(task_id="dummy_start2", dag=dag)
 
 dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
 
 dummy_start >> [update_sync_dms_pda_so, update_sync_dms_so, update_sync_dms_ib, update_sync_dms_dv] >> dummy_start1
 dummy_start1 >> [update_sync_dms_pda_sod, update_sync_dms_sod, update_sync_dms_ibd, update_sync_dms_iv, update_sync_dms_err,update_sync_dms_lt,update_sync_dms_orddisc] >> dummy_start2
-dummy_start2 >> update_sync_dms_omapiviettelsecrekey>> dummy_end
+dummy_start2 >> [update_sync_dms_omapiviettelsecrekey,update_sync_dms_delihistory,update_sync_dms_delihistoryc] >> dummy_end
