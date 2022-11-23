@@ -461,7 +461,7 @@ def tonkho():
     commit_psql(pg_ex)
 
     #input data mới
-    execute_values_insert(df6,'f_sc_daily_invt')
+    # execute_values_insert(df6,'f_sc_daily_invt')
 
     df6['inserted_at2'] = datetime.now()
     df6.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'df6.pickle')

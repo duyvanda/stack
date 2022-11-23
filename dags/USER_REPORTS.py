@@ -77,7 +77,7 @@ def main():
     df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSuXl7AnpSA5j_KrgFO2zhLn8DsD20RVuuG7g6Y7F9y5EbiPHT05ug_m3eh8MBOaMDvNmk-DX4g0igF/pub?gid=1043526978&single=true&output=csv")
     cleancols(df)
     df.columns =lower_col(df)
-    df_aut = pd.melt(df,id_vars=['stt', 'tenreport', 'linkreport', 'type','id', 'vw', 'param'])
+    df_aut = pd.melt(df,id_vars=['stt', 'tenreport', 'linkreport', 'type','id', 'id_mb', 'vw', 'param'])
     df_aut=df_aut[~df_aut['value'].isna()]
     df_aut.rename(columns={'value':'accessgroup'},inplace=True)
 
@@ -129,10 +129,15 @@ def main():
     # SELECT tenreport, id, manv, type, vw FROM `spatial-vision-343005.biteam.d_phanquyen_tonghop_sep`
     # full_df[['tenreport','id','manv','type','vw', 'param']]
     with open('user_reports.json', 'w', encoding='utf-8') as file:
-        full_df[['tenreport','id','manv','type','vw','param']].to_json(file, force_ascii=False, orient='records')
+        full_df[['tenreport','id', 'id_mb', 'manv','type','vw','param']].to_json(file, force_ascii=False, orient='records')
     upload_file_to_bucket_with_metadata(blobname="public/user_reports.json", file="user_reports.json")
 
-# %%
+
+def report_name():
+    df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSuXl7AnpSA5j_KrgFO2zhLn8DsD20RVuuG7g6Y7F9y5EbiPHT05ug_m3eh8MBOaMDvNmk-DX4g0igF/pub?gid=1043526978&single=true&output=csv")
+    df.columns = cleancols(df)
+    df.columns = lower_col(df)
+    bq_values_insert(df[['tenreport','id']], "d_report_name", 3)
 # client=storage.Client()
 # bucketname='django_media_biteam'
 # blobname="public/test1.json"
@@ -150,8 +155,10 @@ dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
 main = PythonOperator(task_id="main", python_callable=main, dag=dag)
 
+report_name = PythonOperator(task_id="report_name", python_callable=report_name, dag=dag)
+
 dummy_end = DummyOperator(task_id="dummy_end", dag=dag)
 
-dummy_start >> main >> dummy_end
+dummy_start >> main >> report_name >> dummy_end
 
 
