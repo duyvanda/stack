@@ -27,7 +27,7 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '*/15 11,12,15,23 * * *',
+          schedule_interval= '*/15 12,23 * * *',
           tags=[prefix+name, 'Daily', '11_PM']
 )
 
@@ -472,7 +472,7 @@ def tonkho():
 
     # điều kiện input
 def update_tonkho():
-    dk  = datetime.now().strftime("%H:%M") in {'11:00','12:00','15:00','23:45'}
+    dk  = datetime.now().strftime("%H:%M") in {'12:00','23:45'}
     # dk = True
     if dk: tonkho()
     else: print("Not a good time", datetime.now().strftime("%H:%M"))
