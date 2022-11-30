@@ -63,7 +63,7 @@ sql = f"""
 with data_kh_chua_viengtham as (
   SELECT slsperid,cast(date_trunc(visitdate,month) as date) as thang_,
 custid,count(distinct soluong_checkin_thucte) 
-from `view_report.f_data_checkin_pbh` 
+from `view_report.f_data_checkin_pbh_v2` 
 
 where visitdate >='2022-08-01'
 group by 1,3,thang_ having count(distinct soluong_checkin_thucte) =0),
@@ -73,6 +73,7 @@ data_gpp as (
 SELECT distinct slsperid,custid,cast(date_trunc(visitdate,month) as date) as mapping_date FROM `spatial-vision-343005.biteam.sync_dms_salesroutedet`
 where 
 visitdate >='2022-08-01'
+and delroutedet is false
  )
 
 select distinct a.*except (custid),a.custid as makhachhangdms,b.slsperid,d.tencvbh,
@@ -107,6 +108,7 @@ SELECT slsperid,cast(date_trunc(visitdate,month) as date) as thang_,
 count(distinct custid)as so_kh_quydinh_viengtham FROM `spatial-vision-343005.biteam.sync_dms_salesroutedet`
 where 
 visitdate >='2022-08-01'
+and delroutedet is false
 group by 1,2
  ),
 
@@ -120,7 +122,7 @@ count(distinct so_kh_viengtham_tt)  as so_kh_viengtham_tt,
 count(distinct sl_kh_phatsinhdh) as sl_kh_phatsinhdh,
 count(distinct soluong_checkin_thucte) as sl_checkin_thucte,
 round(safe_divide(count(distinct sl_dh_thucte),count(distinct soluong_checkin_thucte) )*100,0)  as tile_dh
-from `view_report.f_data_checkin_pbh`
+from `view_report.f_data_checkin_pbh_v2`
 where
   visitdate >='2022-08-01'
 group by 1,2
