@@ -117,6 +117,10 @@ def update():
     AND slr.DelRouteDet = 0
     AND slr.SlsFreq = srd.SlsFreq
     AND srd.VisitDate BETWEEN slr.StartDate AND slr.EndDate
+    INNER JOIN dbo.OM_SalesRouteMaster srm WITH (NOLOCK)
+    ON srm.CustID = srd.CustID
+    AND srm.SalesRouteID = srd.SalesRouteID
+    AND srm.DelRouteDet = 0
     where cast (srd.VisitDate as date) >= @from and cast (srd.VisitDate as date) <= @to
     """
 
