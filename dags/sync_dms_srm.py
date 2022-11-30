@@ -69,6 +69,10 @@ LEFT JOIN {from_tb3} c
 ON a.SalesRouteID =  c.SalesRouteID
 LEFT JOIN {from_tb4} d
 ON c.BranchID =  d.BranchRouteID
+INNER JOIN Users e
+ON b.SlsperID = e.UserName
+and e.Position IN ( 'S', 'SS', 'AM', 'RM', 'D', 'SD', 'AD', 'RD', 'TM', 'TD','NS','GD' )
+and e.Status = 'AC'
 """
 
 def insert():
