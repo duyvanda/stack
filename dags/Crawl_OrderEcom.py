@@ -103,6 +103,7 @@ def upsert():
 
 def mass_update():
     dk = datetime.now().hour in {23} and datetime.now().minute < 30
+    # dk = True
     datenow = datetime.now().strftime("%Y-%m-%d")
     datemn_90 = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
     if dk:
@@ -117,6 +118,7 @@ def mass_update():
         df['inserted_at'] = datetime.now()
         df.created_at = pd.to_datetime(df.created_at)
         df.delivery_date = pd.to_datetime(df.delivery_date)
+        drop_cols(df, ['office_code'])
         execute_bq_query(f""" DELETE FROM biteam.f_crawl_orderecommerce where date(created_at) >='{datemn_90}' """)
         bq_values_insert(df, "f_crawl_orderecommerce", 2)
     else:

@@ -43,8 +43,8 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '0 7 * * *',
-          tags=[prefix+name, 'Daily', '7hour']
+          schedule_interval= '@once',
+          tags=[prefix+name, 'once']
 )
 
 # fdom = datetime.now().replace(day=1).strftime("%Y%m%d")

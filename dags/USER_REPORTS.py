@@ -31,7 +31,7 @@ dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
           schedule_interval= '@hourly',
-          tags=[prefix+name, 'update', 'hourly']
+          tags=[prefix+name, 'update', 'hourly', 'hanhdt']
 )
 
 # %%

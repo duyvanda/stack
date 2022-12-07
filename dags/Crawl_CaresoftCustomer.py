@@ -38,9 +38,10 @@ dag = DAG(prefix+name,
 
 # %%
 data1 = {"from":1643652037221,"to":1656608154405}
-data2 = {"from": 1656612054988, "to": 1672505977905}
-list_dict = [data1, data2]
-list_pickle_pathname = [csv_path+"part1.pickle", csv_path+"part2.pickle"]
+data2 = {"from": 1656612054988, "to": 1669827540000}
+data3 = {"from": 1669827654768, "to": 1672505961391}
+list_dict = [data1, data2, data3]
+list_pickle_pathname = [csv_path+"part1.pickle", csv_path+"part2.pickle", csv_path+"part3.pickle"]
 
 def get_ck():
     url = "https://web11.caresoft.vn/api/login/auth"
@@ -65,6 +66,8 @@ def get_data(pickle_pathname: str, data: dict):
     
     with open('token.string','rb') as f:
         ck = pickle.load(f)
+    
+    print("ck", ck)
     
     url = "https://web11.caresoft.vn/admin/user/export"
     headers = CaseInsensitiveDict()
@@ -96,6 +99,8 @@ def insert():
     df2 = pd.read_pickle(csv_path+"part2.pickle")
     # bq_values_insert(df, "d_caresoft_customer")
     df3 = union_all([df1,df2])
+    df4 = pd.read_pickle(csv_path+"part3.pickle")
+    df3 = union_all([df3,df4])
     print(df3.columns)
     bq_values_insert(df3, "d_caresoft_customer", 3)
 

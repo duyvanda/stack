@@ -13,7 +13,7 @@ path = f'/usr/local/airflow/plugins/{prefix}{name}/'
 # datenow_min1 = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
 dag_params = {
-    'owner': 'phuonght2',
+    'owner': 'hanhdt',
     "depends_on_past": False,
     'start_date': datetime(2022, 7, 13, tzinfo=local_tz),
     # 'email_on_failure': True,
@@ -28,8 +28,8 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '50 23 * * 2',
-          tags=[prefix+name, 'Daily']
+          schedule_interval= '@once',
+          tags=[prefix+name, '@once', 'hanhdt']
 )
 
 # fdom = datetime.now().replace(day=1).strftime("%Y%m%d")
@@ -117,7 +117,7 @@ def update_khsx_nhamay():
     insert_sql = \
     """
     INSERT INTO biteam.f_kehoachsx_capture_t3
-    select * from view_report.f_kehoachsx_capture_t3 where week_day = 3 and day= current_date("+7")
+    select * from view_report.f_kehoachsx_capture_t3 where week_day= 2 and day = date_sub(current_date("+7"),interval 1 day)
     """
 
     execute_bq_query(insert_sql)
