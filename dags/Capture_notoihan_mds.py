@@ -18,77 +18,344 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.providers.tableau.operators.tableau_refresh_workbook import TableauRefreshWorkbookOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.microsoft.mssql.hooks.mssql import MsSqlHook
+from nhan.google_service import get_service
+import pandas_gbq
+from google.cloud import bigquery
+from datetime import datetime 
 
 
 local_tz = pendulum.timezone("Asia/Bangkok")
 
 name='Capture_notoihan_mds'
 prefix='Debt_'
-csv_path = '/usr/local/airflow/plugins'+'/'
+csv_path = '/usr/local/airflow/plugins/nhan'+'/'
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{csv_path}spatial-vision-343005-340470c8d77b.json"
+bigqueryClient = bigquery.Client()
 
 capture_sql = \
 """
-SELECT slsperid,slspername,tenquanlytt,tenquanlyvung,tenquanlykhuvuc, terms, sum(tiennocongty) as tiennocongty,updated_at from (
-	SELECT a.branchid,a.ordernbr,a.slsperid,a.slspername,c.tenquanlytt,c.tenquanlyvung,c.tenquanlykhuvuc,a.supname,a.asmname,a.dateoforder as ngaydatdon,
-	Case when deli_last_updated ='1900-01-01 00:00:00' then now() -interval '1day' else deli_last_updated end
-	as ngaygiaohang, a.custid,a.custname,b.tinh,a.terms,a.inchargename,a.tienchotso,a.tiengiaothanhcong,a.tiennocongty,a.tienthuquyxacnhan,a.duedate,
+with 
+
+data_tracking_debt as (
+	
+	with ngaygiaohang as (
+  select distinct BranchID,ordernbr,ngaygiaohang,status_dv from `view_report.f_leadtime_new_detail1` ),
+
+result as (
+select a.ordernbr,
+       a.branchid,
+       a.SlsperID,
+       c.tencvbh as slspername,
+       a.DateOfOrder,
+       a.duedate,
+       a.custid,
+       b.refcustid,
+       b.custname,
+     Case when trim(a.paymentsform) in ('B','C') then 'TM' else 'CK' end as paymentsform,
+
+     Ifnull(e.channel,b.channel)  as channels,
+     Case  when a.ordernbr in('DH122018-17643','DH062018-13754') then 'CS'
+            when Ifnull(e.channel,b.channel) = 'INS' then 'INS'
+      when trim(a.paymentsform) in ('B','C') and ifnull(e.shoptype,b.shoptype) in ('NT','PK','SI') then 'MDS'
+      when trim(a.paymentsform) in ('B','C') and ifnull(e.shoptype,b.shoptype) in ('CHUOI') and b.terms like '%Thu tiền ngay%' then 'MDS'
+    -- when trim(b.paymentsform) ='Tiền Mặt/Chuyển Khoản' and b.channel not in ('DLPP','CLC') then 'MDS'
+     else 'CS' end as debtincharge_v2, 
+     b.terms,
+		 b.shoptype as subchannel,
+     d.status_dv as trangthaigiaohang,
+     d.ngaygiaohang as deli_last_updated,
+     a.OpeiningOrderAmt as tiennodauky,
+     a.DeliveredOrderAmt  as tienchotso,
+     a.DeliveredOrderAmt - a.ReturnOrdAmt as tiengiaothanhcong,
+     a.tiennocongty,
+     a.DebConfirmAmtRelease as tienthuquyxacnhan,
+		 a.inserted_at,
+Case when b.statedescr in ('Thành phố Cần Thơ','Đồng Nai','Khánh Hòa','Nghệ An',
+'Thành phố Đà Nẵng','Thành phố Hà Nội','Thành phố Hồ Chí Minh') then 'VP TRỰC THUỘC'
+else 'Trạm' end as vptt
+
+from `biteam.f_tracking_debt_all` a 
+LEFT JOIN `biteam.d_master_khachhang` b on a.custid =b.custid 
+LEFT JOIN `biteam.d_users` c on c.manv =a.SlsperID
+LEFT JOIN `spatial-vision-343005.biteam.sync_dms_historycustclass` e on e.version = a.Version
+LEFT JOIN ngaygiaohang d on d.branchid =a.BranchID and d.ordernbr = a.ordernbr)
+
+select * from result where  debtincharge_v2 ='MDS' and tiennocongty >1000 and slsperid <> 'GH001' 
+
+
+),
+
+
+data_checkin as (
+		select a.branchid,a.slsperid,a.custid,a.checktype,a.typ,a.updatetime
+		FROM `spatial-vision-343005.biteam.d_checkin` a
+			JOIN 
+			(SELECT  branchid,slsperid,custid,checktype,
+max(updatetime) as max_updatetime 
+FROM `spatial-vision-343005.biteam.d_checkin` 
+where updatetime >= '2022-02-01' 
+group by 1,2,3,4) b 
+on a.branchid =b.branchid and a.slsperid =b.slsperid and a.custid =b.custid and a.checktype =b.checktype and a.updatetime =b.max_updatetime
+where a.updatetime >= '2022-02-01' and left(typ,2) <>'DE'
+						
+),
+
+phanquyen as (
+  with max_phanquyen as (
+  select manv,max(inserted_at) as max_inserted_at from `spatial-vision-343005.biteam.d_phanquyen_phanam`
+group by 1 )
+
+select distinct a.*
+from `spatial-vision-343005.biteam.d_phanquyen_phanam` a
+JOIN max_phanquyen b on a.manv=b.manv and a.inserted_at =b.max_inserted_at
+),
+phanquyen_email as 
+(
+  select distinct manv, email from phanquyen
+),
+
+phanquyen_nvthaythe as 
+(
+  select a.*,b.tencvbh as nv_thaythe,b.email as email_nv_thaythe from phanquyen  a
+  JOIN phanquyen b on a.nhanvien_thaythe = b.manv and b.trangthaihoatdong ='Còn hoạt động'
+  where a.trangthaihoatdong ='Đã nghỉ'
+),
+
+dms_checkin as (
+with order_checkin as (
+  with order_checkin as (
+
+  SELECT 
+  branchid,
+  	slsperid,
+    	deordernbr,
+      	de_updatetime,
+        	numbercico,
+          	inserted_at
+ FROM `spatial-vision-343005.biteam.sync_dms_decheckin` ),
+
+ max_order_checkin as (
+select branchid,slsperid,deordernbr,max(de_updatetime) as max_de_updatetime from
+`spatial-vision-343005.biteam.sync_dms_decheckin`  group by 1,2,3
+
+ )
+
+ select a.* from order_checkin a
+ JOIN max_order_checkin b on a.branchid =b.branchid and a.slsperid =b.slsperid 
+ and a.deordernbr =b.deordernbr and a.de_updatetime =b.max_de_updatetime ),
+
+ data_checkin as (
+  select slsperid,custid,branchid,lat,lng,typ,checktype,updatetime,numbercico 
+  from `spatial-vision-343005.biteam.d_checkin`
+  where updatetime >'2022-01-01'
+),
+
+checkin_note as (
+  select * from `spatial-vision-343005.biteam.sync_dms_oc`
+  where date(visitdate) >= "2022-01-01"  
+)
+/*
+CL = Close
+IO= In outlet
+PS= Program Sales
+SO= Sales ord vào step ghi nhận đơn hàng
+PA= Thanh toán công nợ
+OO= Out outlet
+DP= trưng bày
+SA= Có đơn hàng
+FC= Feedback customer
+PO = POSM/Gimmick
+SK= Stock keeping
+*/
+
+
+SELECT  b.*,
+a.typ as checkin,a.updatetime  as time_checkin,a.lat,a.lng,
+c.typ as checkout, c.updatetime as time_checkout,
+--c.lat as lat_out, c.lng as lng_out,
+-- d.typ as action, d.updatetime as time_action ,
+
+-- Case when d.typ ='PA' and e.deordernbr is not null then 'Giao hàng'
+-- 		 when d.typ like 'DE%' then 'Giao hàng'
+-- 		 when d.typ ='PA' and e.deordernbr is  null then 'Thanh toán công nợ'
+-- 		 when d.typ ='CL' then 'Close'
+-- 		 when d.typ ='IO' then 'In outlet'
+-- 		 when d.typ ='PS' then 'Program Sales'
+-- 		 when d.typ ='SO' then 'Sales ord vào step ghi nhận đơn hàng'
+-- 		 when d.typ ='OO' then 'Out outlet'
+-- 		 when d.typ ='DP' then 'trưng bày'
+-- 		 when d.typ ='SA' then 'Có đơn hàng'
+-- 		 when d.typ ='FC' then 'Feedback customer'
+-- 		 when d.typ ='PO' then 'POSM/Gimmick'
+-- 		 when d.typ ='SK' then 'Stock keeping'
+-- else null end as phanloai_checkin,
+--d.lat as lat_action, d.lng as lng_action
+-- Case when d.typ like 'DE%' then substr(d.typ, 3)
+-- else
+-- e.deordernbr end as deordernbr
+e.deordernbr
+FROM 
+checkin_note b
+LEFT JOIN
+data_checkin a
+ on a.slsperid =b.slsperid and a.custid =b.custid and a.branchid =b.branchid
+and b.salesid =a.numbercico and a.checktype ='IO'
+LEFT JOIN
+data_checkin c
+ on c.slsperid =b.slsperid and c.custid =b.custid and c.branchid =b.branchid
+and b.salesid =c.numbercico and c.checktype ='OO'
+-- LEFT JOIN
+-- data_checkin d
+--  on d.slsperid =b.slsperid and d.custid =b.custid and d.branchid =b.branchid
+-- and b.salesid =d.numbercico and d.checktype ='MaxAction'
+LEFT JOIN 
+order_checkin e
+on e.slsperid = b.slsperid and e.branchid =b.branchid and e.numbercico =b.salesid 
+and b.checkintype ='Giao Hàng'
+--and (d.typ ='PA' or d.typ like 'DE%')
+ 
+ 
+),
+
+max_giaitrinh_mds as (select madh,max(ngay) as max_ngay from `spatial-vision-343005.biteam.d_giaitrinh_mds` group by 1),
+
+giaitrinh_mds as
+(
+select a.*,row_number() over (partition by a.madh order by a.ngay desc) as row_ from `spatial-vision-343005.biteam.d_giaitrinh_mds` a
+order by a.madh desc
+),
+
+mapping_phanquyen as (
+
+
+SELECT 
+a.branchid ||' - ' || a.ordernbr as filter_order,
+a.branchid,a.ordernbr,
+a.slsperid,
+Case when b.nhanvien_thaythe is not null then b.nhanvien_thaythe 
+else  a.slsperid end as slsperid_new,
+a.slspername,
+  a.dateoforder as ngaydatdon,
+	a.channels as kenh,
+	a.subchannel as kenhphu,
+	a.vptt,
+	Case when deli_last_updated ='1900-01-01 00:00:00' 
+    then datetime_sub((select timestamp(transaction_date) from `spatial-vision-343005.biteam.d_current_table`) ,interval 1 day ) 
+    else deli_last_updated end as ngaygiaohang,
+	-- g.updatetime AS last_checkin,
+	-- k.updatetime AS last_checkout,
+	-- m.updatetime AS last_check_maxaction,
+	-- m.typ as type_action,
+	n.time_checkin as last_checkin,
+	n.time_checkout as last_checkout,
+	n.lat,
+	n.lng,
+	n.distance,
+	n.note as lydo,
+	n.descr as ghichu,
+	a.custid,
+	a.custname,
+	h.statedescr as tinh,
+	h.districtdescr as quan_huyen,
+	h.territorydescr as khu_vuc,
+	h.address,
+	h.attn as ng_lienhe,
+	h.phone,
+	-- b.tinh,
+	a.terms,
+	a.paymentsform,
+	-- a.inchargename,
+	a.tienchotso,
+	a.tiengiaothanhcong,
+	a.tiennocongty,
+	a.tienthuquyxacnhan,
+	a.duedate,
 	Case when trangthaigiaohang ='NaN' then 'Chưa Xác Nhận' else a.trangthaigiaohang end as trangthaigiaohang,
-	 
+	
 	--  Case when 
 	--  EXTRACT('hour' from a.deli_last_updated) in (0,1,2,3,4,5,6,7,8,9,10,11) then date(a.deli_last_updated) + "interval" '16 hour' 
 	-- when
 	--  EXTRACT('hour' from a.deli_last_updated) in (12,13,14,15,16,17,18,19,20,21,22,23) then date(a.deli_last_updated) + "interval"' 10 hour' + interval '1 day'  else now() end as ngaytoihan1,
-	Case when trim(f.tencvbh) = trim(c.tenquanlykhuvuc) then f.email else 'nhanvt92@gmail.com'end as email_mng,
-	Case when trim(e.tencvbh) = trim(c.tenquanlytt) then e.email else 'bimerap.main@gmail.com' end as email_sup,
-	Case when trim(d.tencvbh) = trim(a.slspername) then d.email else 'bimerap.main@gmail.com' end as email_staff,
+	
 	Case 
 		-- when a.terms = 'Gối 1 Đơn Hàng (trong 30 ngày)' then date(duedate)
 		when trangthaigiaohang ='Đã giao hàng' 
-		and terms in ('Thu tiền ngay không có VP PN','Thu tiền ngay có VP PN','Gối Đầu 30 Pha Nam')
-		 	 then date(a.deli_last_updated) + interval '1 day'	 	
-	    when trangthaigiaohang not in ('Đã giao hàng') and a.terms in ('Thu tiền ngay không có VP PN' ,'Gối Đầu 30 Pha Nam') --,'Gối Đầu 30 Pha Nam'
-			 then date(dateoforder) + interval '2 day' 
+		and a.terms in ('Thu tiền ngay không có VP PN','Thu tiền ngay có VP PN','Gối Đầu 30 Pha Nam')
+		 	 then date_add(date(a.deli_last_updated) , interval 1 day)	 	
+	    when trangthaigiaohang not in ('Đã giao hàng') and a.terms in ('Thu tiền ngay không có VP PN','Gối Đầu 30 Pha Nam' ) --,
+			 then date_add(date(dateoforder) , interval 2 day) 
 		when trangthaigiaohang not in ('Đã giao hàng') and a.terms in ('Thu tiền ngay có VP PN')
-			 then date(dateoforder) + interval '1 day' 
+			 then date_add(date(dateoforder) , interval 1 day) 
 	else date(duedate)
 	end as ngaytoihan1,
 	--date(duedate) as ngaytoihan1,
 	Case when 
 	( a.terms not in ('Thu tiền ngay có VP PN','Thu tiền ngay không có VP PN','Gối Đầu 30 Pha Nam') 
-	and date(duedate) <= date(now()) )
+	and date(duedate) <= (select date(transaction_date) from `spatial-vision-343005.biteam.d_current_table`) )
 	or
-	( a.trangthaigiaohang = 'Đã giao hàng'and terms in ('Thu tiền ngay không có VP PN','Thu tiền ngay có VP PN','Gối Đầu 30 Pha Nam') 
-	 and date(a.deli_last_updated) + interval '1 day' <= date(now())
-     
+	( a.trangthaigiaohang = 'Đã giao hàng'and a.terms in ('Thu tiền ngay không có VP PN','Thu tiền ngay có VP PN','Gối Đầu 30 Pha Nam') 
+	 and date_add(date(a.deli_last_updated) , interval 1 day) <=
+     (select date(transaction_date) from `spatial-vision-343005.biteam.d_current_table`) 
 	 )
 	
-	or ( trangthaigiaohang not in ('Đã giao hàng') and a.terms in ('Thu tiền ngay không có VP PN','Gối Đầu 30 Pha Nam') --,'Gối Đầu 30 Pha Nam'
-	and date(dateoforder) + interval '2 day' <= date(now()) ) 
+	or ( trangthaigiaohang not in ('Đã giao hàng') and a.terms in ('Thu tiền ngay không có VP PN','Gối Đầu 30 Pha Nam') --,
+	and date_add(date(dateoforder) , interval 2 day) <= (select date(transaction_date) from `spatial-vision-343005.biteam.d_current_table`) ) 
 
 	or (trangthaigiaohang not in ('Đã giao hàng') and a.terms in ('Thu tiền ngay có VP PN')
-	and date(dateoforder) + interval '1 day' <= date(now()) )
+	and date_add(date(dateoforder) , interval 1 day) <= (select date(transaction_date) from `spatial-vision-343005.biteam.d_current_table`) )
 	
 	then 'Đã tới hạn' else 'Chưa tới hạn' end as no_toi_han,
+	h.hcotypeid as mahco,
+	m.sdt,
+	m.giaitrinh,
+	m.ngay,
+	k.giaitrinh as giaitrinhtruocdo,
+	k.ngay as ngaytruocdo,
 	a.inserted_at  as updated_at
 
-	from f_tracking_debt a
-	LEFT JOIN d_kh b on a.custid = b.custid
-	LEFT JOIN d_users c on c.manv =a.slsperid
-	LEFT JOIN d_takeorder_phanquyenstaff d on trim(d.tencvbh) = trim(a.slspername)
-	LEFT JOIN d_takeorder_phanquyenstaff e on trim(e.tencvbh) = trim(c.tenquanlytt)
-	LEFT JOIN d_takeorder_phanquyenstaff f on trim(f.tencvbh) = trim(c.tenquanlykhuvuc)
-	where 
-	(
-	--terms in ('Thu tiền ngay có VP PN','Thu tiền ngay không có VP PN','Gối 1 Đơn Hàng (trong 30 ngày)','Gối Đầu 30 Pha Nam')  
-	--and a.paymentsform ='TM'--
-	--and 
-	debtincharge_v2 ='MDS'  and tiennocongty > 1000 and a.slsperid <> 'GH001'
-	) 
-	) a
-	where no_toi_han ='Đã tới hạn'
-	GROUP BY 
-slsperid,slspername,tenquanlytt,tenquanlyvung,tenquanlykhuvuc, terms,updated_at
-ORDER BY slspername
+	-- from `spatial-vision-343005.biteam.f_tracking_debt` a
+	from data_tracking_debt a
+	LEFT JOIN phanquyen b on Left(a.slsperid,6) = b.manv
+	-- LEFT JOIN `spatial-vision-343005.biteam.d_kh` b on a.custid = b.custid
+	LEFT JOIN `spatial-vision-343005.biteam.d_master_khachhang` h on h.custid = a.custid
+	LEFT JOIN dms_checkin n on n.branchid = a.branchid and n.custid =a.custid and a.slsperid = n.slsperid and a.ordernbr = n.deordernbr 
+	LEFT JOIN giaitrinh_mds m on m.madh = a.ordernbr  and m.row_ =1
+	LEFT JOIN giaitrinh_mds k on k.madh = a.ordernbr  and k.row_ =2
+
+	-- LEFT JOIN data_checkin g ON g.branchid = a.branchid AND g.custid = a.custid and g.slsperid =a.slsperid 
+	-- and g.checktype ='IO'
+	-- 	LEFT JOIN data_checkin k ON k.branchid = a.branchid AND k.custid = a.custid and k.slsperid =a.slsperid
+	-- and k.checktype ='OO'
+	-- 	LEFT JOIN data_checkin m ON m.branchid = a.branchid AND m.custid = a.custid and m.slsperid =a.slsperid
+	-- and m.typ not in ('IO','OO')
+	-- where 
+	
+	-- --and a.paymentsform ='TM'--
+	-- debtincharge_v2 ='MDS'  and tiennocongty > 1000 and  a.slsperid <> 'GH001' 
+	-- and concat(a.branchid,a.ordernbr) not in ('MR0015DH072021-00313','MR0015DH102021-01252') --tracking debt lỗi còn 2 đơn này
+	),
+
+	result as (
+	 	select a.*except(slspername),
+	c.tencvbh as slspername,
+	c.tenquanlytt,c.tenquanlyvung,c.tenquanlykhuvuc,
+	Case when trim(upper(f.manv)) = trim(upper(c.asm)) then f.email else 'nhanvt92@gmail.com'end as email_mng,
+	Case when trim(upper(e.manv)) = trim(upper(c.supid))  then e.email else 'bimerap.main@gmail.com' end as email_sup,
+	Case when trim(upper(d.manv)) = trim(upper(a.slsperid_new)) then d.email else 'bimerap.main@gmail.com' end as email_staff
+	 from mapping_phanquyen a 
+	LEFT JOIN `spatial-vision-343005.biteam.d_users` c on c.manv =a.slsperid_new
+	LEFT JOIN phanquyen_email d on trim(upper(d.manv)) = trim(upper(a.slsperid_new))
+	LEFT JOIN phanquyen_email e on trim(upper(e.manv)) = trim(upper(c.supid)) 
+	LEFT JOIN phanquyen_email f on trim(upper(f.manv)) = trim(upper(c.asm)) 
+	)
+	select slsperid_new as slsperid,slspername,tenquanlytt,tenquanlyvung,tenquanlykhuvuc, terms, sum(tiennocongty) as tiennocongty,
+	current_datetime("+7") as updated_at from result 
+	group by 1,2,3,4,5,6
+  
+	-- select * from result --where ordernbr ='DH0-1122-03310'
+	--where slspername like '%Khải%'
+	
 """
 
 
@@ -113,7 +380,7 @@ dag = DAG(prefix+name,
 )
 
 def update_table():
-	df = get_ps_df(capture_sql)
+	df = bigqueryClient.query(capture_sql).to_dataframe()
 	bq_values_insert(df, "f_daily_capture_notoihan_taixe", 2)
 	pk = ['slsperid','updated_at','terms']
 	execute_values_upsert(df, "f_daily_capture_notoihan_taixe",pk)
