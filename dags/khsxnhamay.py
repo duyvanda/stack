@@ -39,30 +39,31 @@ dag = DAG(prefix+name,
 
 
 def update_khsx_nhamay():
-    t7=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=0&single=true&output=csv")
-    t8=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=1038230106&single=true&output=csv")
-    t9=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=17231151&single=true&output=csv")
-    t10=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=523968361&single=true&output=csv")
-    t11=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=507303559&single=true&output=csv")
+    # t7=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=0&single=true&output=csv")
+    # t8=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=1038230106&single=true&output=csv")
+    # t9=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=17231151&single=true&output=csv")
+    # t10=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=523968361&single=true&output=csv")
+    # t11=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=507303559&single=true&output=csv")
     t12=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=604997355&single=true&output=csv")
-
+    t123=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRD6M-I1HqZYPnrOeRy3q_RKVzIAml-tItrBDUdPUZcX1KGNGHvYL-7dabjV8Ao1IcNRM01pCrGuOb6/pub?gid=1635248494&single=true&output=csv")
     tonchuanhap=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRyzCqWkMoy_XdBYCO6oirKy6pXwHEjxVKJqBgvmKHXH8dnZ0hl_sOMXxgZkYnl1r2m8tUvz47GPCJZ/pub?gid=0&single=true&output=csv")
     songaynhapkho=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRyzCqWkMoy_XdBYCO6oirKy6pXwHEjxVKJqBgvmKHXH8dnZ0hl_sOMXxgZkYnl1r2m8tUvz47GPCJZ/pub?gid=770086452&single=true&output=csv")
     quycachdh=pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRyzCqWkMoy_XdBYCO6oirKy6pXwHEjxVKJqBgvmKHXH8dnZ0hl_sOMXxgZkYnl1r2m8tUvz47GPCJZ/pub?gid=1649408062&single=true&output=csv")
 
-    t7['month']='2022-07-01'
-    t8['month']='2022-08-01'
-    t9['month']='2022-09-01'
-    t10['month']='2022-10-01'
-    t11['month']='2022-11-01'
+    # t7['month']='2022-07-01'
+    # t8['month']='2022-08-01'
+    # t9['month']='2022-09-01'
+    # t10['month']='2022-10-01'
+    # t11['month']='2022-11-01'
     t12['month']='2022-12-01'
+    t123['month']='2023-01-01'
 
-    month_list = [t7,t8,t9,t10,t11,t12,tonchuanhap,songaynhapkho,quycachdh]
+    month_list = [t12,t123, tonchuanhap,songaynhapkho,quycachdh]
     for i in month_list:
         cleancols(i)
         i.columns = lower_col(i)
     
-    df=pd.concat([t7,t8,t9,t10,t11,t12])
+    df=pd.concat([t12,t123])
     df= df[df['masanphamphanam'].notna()].copy()    
     df_old=df.copy()
     df.drop(['stt','giaidoan',

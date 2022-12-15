@@ -33,7 +33,7 @@ dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
           schedule_interval= '30 7,9,14 * * *',
-          tags=[prefix+name, 'Daily', '60mins']
+          tags=[prefix+name, 'Daily', '60mins', 'hanhdt']
 )
 
 def update_table():
@@ -597,13 +597,7 @@ def etl_to_postgres():
                 ReceiveAmt = 0,
                 Reason = '',
                 --CountDebtConfirm = 1,
-                DebConfirmAmt = CASE
-                                    WHEN aDetail.AccountID IS NOT NULL
-                                            AND aDetail.AccountID = '711' THEN
-                                        0
-                                    ELSE
-                                        ISNULL(aDetail.Amt, a.AdjAmt)
-                                END,
+                DebConfirmAmt = ISNULL(a.AdjAmt, 00),
                 --CountDebtConfirmRelease = 0,
                 DebConfirmAmtRelease = 0,
                 ord.PaymentsForm
@@ -631,13 +625,6 @@ def etl_to_postgres():
                     AND a.AdjdRefNbr = ord.ARRefNbr
                     AND a.BranchID = ord.BranchID
                     AND ISNULL(a.Reversal, '') = ''
-                LEFT JOIN dbo.AR_AdjustDetail aDetail WITH (NOLOCK)
-                    ON aDetail.BranchID = a.BranchID
-                    AND aDetail.BatNbr = a.BatNbr
-                    AND aDetail.AdjgBatNbr = a.AdjgBatNbr
-                    AND aDetail.AdjgRefNbr = a.AdjgRefNbr
-                    AND aDetail.AdjdBatNbr = a.AdjdBatNbr
-                    AND aDetail.AdjdRefNbr = a.AdjdRefNbr
                 INNER JOIN AR_Doc b WITH (NOLOCK)
                     ON b.BranchID = a.BranchID
                     AND b.BatNbr = a.AdjgBatNbr
@@ -713,13 +700,7 @@ def etl_to_postgres():
         ReceiveAmt = 0,
         Reason = '',
         DebConfirmAmt = 0,
-        DebConfirmAmtRelease = CASE
-                            WHEN aDetail.AccountID IS NOT NULL
-                                AND aDetail.AccountID = '711' THEN
-                                0
-                            ELSE
-                                ISNULL(aDetail.Amt, a.AdjAmt)
-                        END,
+        DebConfirmAmtRelease = ISNULL(a.AdjAmt, 0),
         ord.PaymentsForm
         FROM OM_SalesOrd ord
         INNER JOIN dbo.OM_DebtAllocateDet deb WITH (NOLOCK)
@@ -744,13 +725,6 @@ def etl_to_postgres():
             AND a.AdjdRefNbr = ord.ARRefNbr
             AND a.BranchID = ord.BranchID
             AND ISNULL(a.Reversal, '') = ''
-        LEFT JOIN dbo.AR_AdjustDetail aDetail WITH (NOLOCK)
-        ON aDetail.BranchID = a.BranchID
-            AND aDetail.BatNbr = a.BatNbr
-            AND aDetail.AdjgBatNbr = a.AdjgBatNbr
-            AND aDetail.AdjgRefNbr = a.AdjgRefNbr
-            AND aDetail.AdjdBatNbr = a.AdjdBatNbr
-            AND aDetail.AdjdRefNbr = a.AdjdRefNbr
         INNER JOIN AR_Doc b WITH (NOLOCK)
         ON b.BranchID = a.BranchID
             AND b.BatNbr = a.AdjgBatNbr
@@ -1625,6 +1599,10 @@ def insert():
         dk2 = df2.branchid == 'MR0003'
         df2.debtincharge_v2 = np.where(dk1&dk2, "CS", df2.debtincharge_v2)
         #
+        #update don sai => Moving sang type error
+        dk1 = df2.ordernbr == 'DH6-1222-00080'
+        dk2 = df2.branchid == 'MR0016'
+        df2.debtincharge_v2 = np.where(dk1&dk2, "ERROR", df2.debtincharge_v2)
 
         df2['inserted_at'] = datetime.now()
         # BQ first 

@@ -35,7 +35,7 @@ dag = DAG(prefix+name,
         #   https://crontab.guru/
         #   @once
           schedule_interval= '15 13 * * *',
-          tags=[prefix+name, 'Daily', 'at 13h15']
+          tags=[prefix+name, 'Daily', 'at 13h15', 'hanhdt']
 )
 # Json_file ="D:/ipynb/sever_tttt_ins/datateam1599968716114-6f9f144b4262.json"
 

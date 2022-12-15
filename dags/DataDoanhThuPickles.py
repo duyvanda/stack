@@ -406,13 +406,7 @@ def get_pickles():
                 ReceiveAmt = 0,
                 Reason = '',
                 --CountDebtConfirm = 1,
-                DebConfirmAmt = CASE
-                                    WHEN aDetail.AccountID IS NOT NULL
-                                            AND aDetail.AccountID = '711' THEN
-                                        0
-                                    ELSE
-                                        ISNULL(aDetail.Amt, a.AdjAmt)
-                                END,
+                DebConfirmAmt = ISNULL(a.AdjAmt,0),           
                 --CountDebtConfirmRelease = 0,
                 DebConfirmAmtRelease = 0,
                 ord.PaymentsForm
@@ -440,13 +434,6 @@ def get_pickles():
                     AND a.AdjdRefNbr = ord.ARRefNbr
                     AND a.BranchID = ord.BranchID
                     AND ISNULL(a.Reversal, '') = ''
-                LEFT JOIN dbo.AR_AdjustDetail aDetail WITH (NOLOCK)
-                    ON aDetail.BranchID = a.BranchID
-                    AND aDetail.BatNbr = a.BatNbr
-                    AND aDetail.AdjgBatNbr = a.AdjgBatNbr
-                    AND aDetail.AdjgRefNbr = a.AdjgRefNbr
-                    AND aDetail.AdjdBatNbr = a.AdjdBatNbr
-                    AND aDetail.AdjdRefNbr = a.AdjdRefNbr
                 INNER JOIN AR_Doc b WITH (NOLOCK)
                     ON b.BranchID = a.BranchID
                     AND b.BatNbr = a.AdjgBatNbr
@@ -510,13 +497,7 @@ def get_pickles():
         ReceiveAmt = 0,
         Reason = '',
         DebConfirmAmt = 0,
-        DebConfirmAmtRelease = CASE
-                            WHEN aDetail.AccountID IS NOT NULL
-                                AND aDetail.AccountID = '711' THEN
-                                0
-                            ELSE
-                                ISNULL(aDetail.Amt, a.AdjAmt)
-                        END,
+        DebConfirmAmtRelease = ISNULL(a.AdjAmt,0),
         ord.PaymentsForm
         FROM OM_SalesOrd ord
         INNER JOIN dbo.OM_DebtAllocateDet deb WITH (NOLOCK)
@@ -541,13 +522,6 @@ def get_pickles():
             AND a.AdjdRefNbr = ord.ARRefNbr
             AND a.BranchID = ord.BranchID
             AND ISNULL(a.Reversal, '') = ''
-        LEFT JOIN dbo.AR_AdjustDetail aDetail WITH (NOLOCK)
-        ON aDetail.BranchID = a.BranchID
-            AND aDetail.BatNbr = a.BatNbr
-            AND aDetail.AdjgBatNbr = a.AdjgBatNbr
-            AND aDetail.AdjgRefNbr = a.AdjgRefNbr
-            AND aDetail.AdjdBatNbr = a.AdjdBatNbr
-            AND aDetail.AdjdRefNbr = a.AdjdRefNbr
         INNER JOIN AR_Doc b WITH (NOLOCK)
         ON b.BranchID = a.BranchID
             AND b.BatNbr = a.AdjgBatNbr

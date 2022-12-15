@@ -35,59 +35,7 @@ bigqueryClient = bigquery.Client()
 
 capture_sql = \
 """
-with 
-
-data_tracking_debt as (
-	
-	with ngaygiaohang as (
-  select distinct BranchID,ordernbr,ngaygiaohang,status_dv from `view_report.f_leadtime_new_detail1` ),
-
-result as (
-select a.ordernbr,
-       a.branchid,
-       a.SlsperID,
-       c.tencvbh as slspername,
-       a.DateOfOrder,
-       a.duedate,
-       a.custid,
-       b.refcustid,
-       b.custname,
-     Case when trim(a.paymentsform) in ('B','C') then 'TM' else 'CK' end as paymentsform,
-
-     Ifnull(e.channel,b.channel)  as channels,
-     Case  when a.ordernbr in('DH122018-17643','DH062018-13754') then 'CS'
-            when Ifnull(e.channel,b.channel) = 'INS' then 'INS'
-      when trim(a.paymentsform) in ('B','C') and ifnull(e.shoptype,b.shoptype) in ('NT','PK','SI') then 'MDS'
-      when trim(a.paymentsform) in ('B','C') and ifnull(e.shoptype,b.shoptype) in ('CHUOI') and b.terms like '%Thu tiền ngay%' then 'MDS'
-    -- when trim(b.paymentsform) ='Tiền Mặt/Chuyển Khoản' and b.channel not in ('DLPP','CLC') then 'MDS'
-     else 'CS' end as debtincharge_v2, 
-     b.terms,
-		 b.shoptype as subchannel,
-     d.status_dv as trangthaigiaohang,
-     d.ngaygiaohang as deli_last_updated,
-     a.OpeiningOrderAmt as tiennodauky,
-     a.DeliveredOrderAmt  as tienchotso,
-     a.DeliveredOrderAmt - a.ReturnOrdAmt as tiengiaothanhcong,
-     a.tiennocongty,
-     a.DebConfirmAmtRelease as tienthuquyxacnhan,
-		 a.inserted_at,
-Case when b.statedescr in ('Thành phố Cần Thơ','Đồng Nai','Khánh Hòa','Nghệ An',
-'Thành phố Đà Nẵng','Thành phố Hà Nội','Thành phố Hồ Chí Minh') then 'VP TRỰC THUỘC'
-else 'Trạm' end as vptt
-
-from `biteam.f_tracking_debt_all` a 
-LEFT JOIN `biteam.d_master_khachhang` b on a.custid =b.custid 
-LEFT JOIN `biteam.d_users` c on c.manv =a.SlsperID
-LEFT JOIN `spatial-vision-343005.biteam.sync_dms_historycustclass` e on e.version = a.Version
-LEFT JOIN ngaygiaohang d on d.branchid =a.BranchID and d.ordernbr = a.ordernbr)
-
-select * from result where  debtincharge_v2 ='MDS' and tiennocongty >1000 and slsperid <> 'GH001' 
-
-
-),
-
-
-data_checkin as (
+with data_checkin as (
 		select a.branchid,a.slsperid,a.custid,a.checktype,a.typ,a.updatetime
 		FROM `spatial-vision-343005.biteam.d_checkin` a
 			JOIN 
@@ -234,7 +182,7 @@ a.branchid ||' - ' || a.ordernbr as filter_order,
 a.branchid,a.ordernbr,
 a.slsperid,
 Case when b.nhanvien_thaythe is not null then b.nhanvien_thaythe 
-else a.slsperid end as slsperid_new,
+else b.manv end as slsperid_new,
 a.slspername,
   a.dateoforder as ngaydatdon,
 	a.channels as kenh,
@@ -265,7 +213,7 @@ a.slspername,
 	-- b.tinh,
 	a.terms,
 	a.paymentsform,
-	-- a.inchargename,
+	a.inchargename,
 	a.tienchotso,
 	a.tiengiaothanhcong,
 	a.tiennocongty,
@@ -277,6 +225,9 @@ a.slspername,
 	--  EXTRACT('hour' from a.deli_last_updated) in (0,1,2,3,4,5,6,7,8,9,10,11) then date(a.deli_last_updated) + "interval" '16 hour' 
 	-- when
 	--  EXTRACT('hour' from a.deli_last_updated) in (12,13,14,15,16,17,18,19,20,21,22,23) then date(a.deli_last_updated) + "interval"' 10 hour' + interval '1 day'  else now() end as ngaytoihan1,
+	
+
+
 	
 	Case 
 		-- when a.terms = 'Gối 1 Đơn Hàng (trong 30 ngày)' then date(duedate)
@@ -314,8 +265,7 @@ a.slspername,
 	k.ngay as ngaytruocdo,
 	a.inserted_at  as updated_at
 
-	-- from `spatial-vision-343005.biteam.f_tracking_debt` a
-	from data_tracking_debt a
+	from `spatial-vision-343005.biteam.f_tracking_debt` a
 	LEFT JOIN phanquyen b on Left(a.slsperid,6) = b.manv
 	-- LEFT JOIN `spatial-vision-343005.biteam.d_kh` b on a.custid = b.custid
 	LEFT JOIN `spatial-vision-343005.biteam.d_master_khachhang` h on h.custid = a.custid
@@ -329,15 +279,15 @@ a.slspername,
 	-- and k.checktype ='OO'
 	-- 	LEFT JOIN data_checkin m ON m.branchid = a.branchid AND m.custid = a.custid and m.slsperid =a.slsperid
 	-- and m.typ not in ('IO','OO')
-	-- where 
+	where 
 	
-	-- --and a.paymentsform ='TM'--
-	-- debtincharge_v2 ='MDS'  and tiennocongty > 1000 and  a.slsperid <> 'GH001' 
-	-- and concat(a.branchid,a.ordernbr) not in ('MR0015DH072021-00313','MR0015DH102021-01252') --tracking debt lỗi còn 2 đơn này
+	--and a.paymentsform ='TM'--
+	debtincharge_v2 ='MDS'  and tiennocongty > 1000 and a.slsperid <> 'GH001' 
+	and concat(a.branchid,a.ordernbr) not in ('MR0015DH072021-00313','MR0015DH102021-01252') --tracking debt lỗi còn 2 đơn này
 	),
-
 	result as (
-	 	select a.*except(slspername),
+	select a.*except(slspername),
+	c.supid as ma_sup,
 	c.tencvbh as slspername,
 	c.tenquanlytt,c.tenquanlyvung,c.tenquanlykhuvuc,
 	Case when trim(upper(f.manv)) = trim(upper(c.asm)) then f.email else 'nhanvt92@gmail.com'end as email_mng,
@@ -375,7 +325,7 @@ dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
           schedule_interval= '0 19 * * *',
-          tags=[prefix+name, 'Daily', 'at19']
+          tags=[prefix+name, 'Daily', 'at19', 'hanhdt']
 )
 
 def update_table():

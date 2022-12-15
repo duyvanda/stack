@@ -38,7 +38,7 @@ dag = DAG(prefix+name,
         #   https://crontab.guru/
         #   @once
           schedule_interval= '0 4 2,3,4,5,6 * *',
-          tags=[prefix+name, 'Daily', 'at 5h15']
+          tags=[prefix+name, 'Daily', 'at 5h15','hanhdt']
 )
 
 def data_chinhsua_tt():

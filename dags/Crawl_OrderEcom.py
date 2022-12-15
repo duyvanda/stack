@@ -72,6 +72,7 @@ def get_data():
     df0['inserted_at'] = datetime.now()
     df0.created_at = pd.to_datetime(df0.created_at)
     df0.delivery_date = pd.to_datetime(df0.delivery_date)
+    df0.rename(columns={'grand_total':'grant_total'}, inplace=True)
     bq_values_insert(df0, "f_crawl_orderecommerce_temp", 3)
     return None
 
@@ -118,7 +119,8 @@ def mass_update():
         df['inserted_at'] = datetime.now()
         df.created_at = pd.to_datetime(df.created_at)
         df.delivery_date = pd.to_datetime(df.delivery_date)
-        drop_cols(df, ['office_code'])
+        # drop_cols(df, ['office_code'])
+        df.rename(columns={'grand_total':'grant_total'}, inplace=True)
         execute_bq_query(f""" DELETE FROM biteam.f_crawl_orderecommerce where date(created_at) >='{datemn_90}' """)
         bq_values_insert(df, "f_crawl_orderecommerce", 2)
     else:
