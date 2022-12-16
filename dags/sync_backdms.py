@@ -929,7 +929,8 @@ def update_sync_dms_ctkm2022otc():
     INNER JOIN dbo.OM_DiscSeq sq WITH (NOLOCK)
     ON sq.DiscID = dis.DiscID
     AND sq.DiscSeq = dis.DiscSeq
-    where DiscIDPN = 'CTKM2212OTC-ECOMMERCE'
+    and sq.DiscIDPN in ('CTKM2212OTC-ECOMMERCE', 'CTKM2210OTC-ECOMMERCE')
+    --where DiscIDPN = 'CTKM2212OTC-ECOMMERCE'
     """
     df = get_ms_df(sql)
     df['inserted_at'] = datetime.now()
