@@ -40,7 +40,7 @@ dag = DAG(prefix+name,
 
 # %%
 def insert():    
-    date_start = datetime(2022,6,26).strftime("%Y-%m-%d")
+    date_start = datetime(2022,1,1).strftime("%Y-%m-%d")
     date_end = datetime.now().strftime("%Y-%m-%d")
     print(date_start, date_end)
     url = f"""https://eoffice.merapgroup.com/eoffice/api/api/raw/data-follow?active_oa=1&date_start={date_start}&date_end={date_end}&limit=10000"""

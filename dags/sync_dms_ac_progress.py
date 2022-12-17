@@ -52,7 +52,25 @@ table_name = "d_accumulated_progress"
 table_temp = "d_accumulated_progress_temp"
 
 def insert():
-	pass
+	sql = \
+	"""
+	select
+	LineRef,
+	AccumulateID,
+	BranchID,
+	CustID,
+	OrderNbr,
+	AccumulatedValue,
+	Crtd_DateTime,
+	Lupd_DateTime
+	from OM_AccumulatedResultDet where 1=1
+	and AccumulateID = 'CSBH2204OTC-14QD/MR-KS-STO'
+	"""
+	df = get_ms_df(sql)
+
+	bq_values_insert(df, "d_accumulated_result", 3)
+
+
 
 def update():
 	dsql = \
