@@ -30,7 +30,7 @@ name='Capture_notoihan_mds_hanh'
 prefix='Debt_'
 csv_path = '/usr/local/airflow/plugins/nhan'+'/'
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{csv_path}spatial-vision-343005-340470c8d77b.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/usr/local/airflow/dags/files/bigquery2609.json"
 bigqueryClient = bigquery.Client()
 
 capture_sql = \

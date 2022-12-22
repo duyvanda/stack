@@ -51,13 +51,18 @@ dag = DAG(prefix+name,
           tags=[prefix+name, 'On Monday']
 )
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{csv_path}spatial-vision-343005-340470c8d77b.json"
-bigqueryClient = bigquery.Client()
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{csv_path}spatial-vision-343005-340470c8d77b.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/usr/local/airflow/dags/files/bigquery2609.json"
+
+date_now = datetime.now().date()
+
 
 sql = f""" 
 
 
 -- Create view view_report.f_data_kh_checkin_canchamsoc
+-- tthd_send_email
+-- test lan 2 18:46:00
 -- as
 
 with data_kh_chua_viengtham as (
@@ -221,16 +226,14 @@ result as (
 
 
 """
-
-df = bigqueryClient.query(sql).to_dataframe()
-
-a=df.shape
-b=a[0]
-
-date_now = datetime.now().date()
-path=f'{csv_path}tt_hanhdong_crs/{date_now}_{b}_data_send_email.csv'
-
-df.to_csv(path,index = False,header=False)
+def get_data():
+    bigqueryClient = bigquery.Client()
+    df = bigqueryClient.query(sql).to_dataframe()
+    a=df.shape
+    b=a[0]
+    path=f'{csv_path}tt_hanhdong_crs/{date_now}_{b}_data_send_email.csv'
+    df.to_csv(path,index = False,header=False)
+    return df
 
 def sendmail(slsperid, tencvbh,thang_,thang_den,check_thang, so_kh_quydinh_viengtham,so_kh_chua_viengtham, custid_saphetthoihanhieuluc,custid_hetthoihanhieuluc, sl_dh_thucte, sl_checkin_thucte,tile_dh, so_kh_viengtham_tt, sl_kh_checkin, sl_kh_phatsinhdh,send_email):
     EMAIL_ADDRESS = 'bi@merapgroup.com'
@@ -281,8 +284,14 @@ def sendmail(slsperid, tencvbh,thang_,thang_den,check_thang, so_kh_quydinh_vieng
         smtp.sendmail(to_addrs=(send_email,cc), from_addr=EMAIL_ADDRESS, msg = msg.as_string())
         print('Message has been sent')
         print(send_email)
-        
+
+
+
+
 def send_email_auto():
+    df1=get_data()
+    a=df1.shape
+    b=a[0]
     with open(f"{csv_path}tt_hanhdong_crs/{date_now}_{b}_data_send_email.csv",encoding='utf-8') as f:
         # line=f.readlines()[1:]
         # f.close()

@@ -14,7 +14,8 @@ local_tz = pendulum.timezone("Asia/Bangkok")
 name='Gdocs'
 prefix='D_GiaiTrinh_MDS_'
 csv_path = '/usr/local/airflow/plugins'+'/nhan/'
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{csv_path}spatial-vision-343005-340470c8d77b.json"
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{csv_path}spatial-vision-343005-340470c8d77b.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/usr/local/airflow/dags/files/bigquery2609.json"
 
 dag_params = {
     'owner': 'nhanvo',

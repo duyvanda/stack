@@ -28,8 +28,9 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '10 0 * * *',
-          tags=[prefix+name, 'Daily', 'at0']
+          # schedule_interval= '10 0 * * *',
+          schedule_interval= '@once',
+          tags=[prefix+name]
 )
 
 base_url = 'https://api.caresoft.vn/merapgroup/api/v1/'

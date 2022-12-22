@@ -44,11 +44,11 @@ dag = DAG(prefix+name,
           default_args=dag_params,
           # https://crontab.guru/
           # @once 0 0 * * 1,3,5
-          schedule_interval= '00 0-23 * * *',
-          tags=[prefix+name, 'Hourly']
+          schedule_interval= '@once',
+          tags=[prefix+name, 'once']
 )
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{csv_path}spatial-vision-343005-340470c8d77b.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/usr/local/airflow/dags/files/bigquery2609.json"
 table_name ='d_crawl_shopee'
 bigqueryClient = bigquery.Client()
 now = datetime.now() # current date and time
