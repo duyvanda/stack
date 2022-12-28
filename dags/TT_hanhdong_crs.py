@@ -6,6 +6,7 @@ from nhan.google_service import get_service
 import pandas_gbq
 import pendulum
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from google.cloud import bigquery
@@ -229,15 +230,16 @@ result as (
 def get_data():
     bigqueryClient = bigquery.Client()
     df = bigqueryClient.query(sql).to_dataframe()
-    a=df.shape
-    b=a[0]
-    path=f'{csv_path}tt_hanhdong_crs/{date_now}_{b}_data_send_email.csv'
+    # a=df.shape
+    # b=a[0]
+    path=f'{csv_path}tt_hanhdong_crs/{date_now}_data_send_email.csv'
     df.to_csv(path,index = False,header=False)
-    return df
+    return None
 
 def sendmail(slsperid, tencvbh,thang_,thang_den,check_thang, so_kh_quydinh_viengtham,so_kh_chua_viengtham, custid_saphetthoihanhieuluc,custid_hetthoihanhieuluc, sl_dh_thucte, sl_checkin_thucte,tile_dh, so_kh_viengtham_tt, sl_kh_checkin, sl_kh_phatsinhdh,send_email):
     EMAIL_ADDRESS = 'bi@merapgroup.com'
-    EMAIL_PASSOWRD = 'Bimerap@999'
+    pass_bi = Variable.get("login__pass_bi_mail", None)
+    EMAIL_PASSOWRD = pass_bi
     msg = MIMEMultipart('alternative')
     msg['Subject'] = f'Thông tin gợi ý hành động cho CRS'
     msg.add_header('Content-Type','text/html')
@@ -289,11 +291,13 @@ def sendmail(slsperid, tencvbh,thang_,thang_den,check_thang, so_kh_quydinh_vieng
 
 
 def send_email_auto():
-    df1=get_data()
-    a=df1.shape
-    b=a[0]
-    with open(f"{csv_path}tt_hanhdong_crs/{date_now}_{b}_data_send_email.csv",encoding='utf-8') as f:
+    # df1=get_data()
+    # a=df1.shape
+    # b=a[0]
+    with open(f"{csv_path}tt_hanhdong_crs/{date_now}_data_send_email.csv",encoding='utf-8') as f:
         # line=f.readlines()[1:]
+        len_csv=pd.read_csv(f"{csv_path}tt_hanhdong_crs/{date_now}_data_send_email.csv",encoding='utf-8')
+        b=len(len_csv)
         # f.close()
         for i in range(0,b+1):
             try:
@@ -305,6 +309,7 @@ def send_email_auto():
                 print(E)
             
 def main(): 
+    get_data()
     send_email_auto()
     
 if __name__ == "__main__":

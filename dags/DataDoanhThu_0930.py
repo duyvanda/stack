@@ -1607,8 +1607,8 @@ def insert():
         df2['inserted_at'] = datetime.now()
         # BQ first 
         bq_values_insert(df2, "f_tracking_debt", 3)
-        primary_keys=['ordernbr', 'branchid', 'dateoforder', 'duedate']
-        execute_values_upsert(df2, 'f_tracking_debt', primary_keys)
+        # primary_keys=['ordernbr', 'branchid', 'dateoforder', 'duedate']
+        # execute_values_upsert(df2, 'f_tracking_debt', primary_keys)
 
 
 

@@ -16,6 +16,7 @@ local_tz = pendulum.timezone("Asia/Bangkok")
 name='BaoCaoSales'
 prefix='Sales'
 csv_path = '/home/biserver/data_lake/'+prefix+name+'/'
+path = '/usr/local/airflow/dags/files/'
 
 dag_params = {
     'owner': 'airflow',
@@ -66,27 +67,27 @@ def etl_to_postgres():
         FINAL.NgayGiaoHang.fillna(datetime(1900, 1, 1), inplace=True)
 
         FINAL['phanloaispcl'] = FINAL['MaSanPham'].map(
-            df_to_dict(get_ps_df("select masanpham, phanloai from d_nhom_sp where nhomsp='SPCL'"))
+            df_to_dict(pd.read_pickle(path+'spcl.df'))
         ).fillna('Khác')
 
         FINAL['nhomsp'] = FINAL['MaSanPham'].map(
-            df_to_dict(get_ps_df("select masanpham, nhomsp from d_nhom_sp where nhomsp IN ('SPCL', 'SP MOI') "))
+            df_to_dict(pd.read_pickle(path+'spcl_spm.df'))
         ).fillna('Khác')
 
         FINAL['khuvucviettat'] = FINAL['TenKhuVuc'].map(
-            df_to_dict(get_ps_df("select * from d_mkv_viet_tat"))
+            df_to_dict(pd.read_pickle(path+'d_mkv_viet_tat.df'))
         )
 
         FINAL['chinhanh'] = FINAL['MaCongTyCN'].map(
-            df_to_dict(get_ps_df("select * from d_chi_nhanh"))
+            df_to_dict(pd.read_pickle(path+'d_chi_nhanh.df'))
         )
 
         FINAL['newhco'] = (FINAL['MaKenhPhu']+FINAL['MaPhanLoaiHCO']).map(
-            df_to_dict(get_ps_df("SELECT concat(makenhphu, maphanloaihco) as concat, new_mahco FROM d_pl_hco"))
+            df_to_dict(pd.read_pickle(path+'d_pl_hco.df'))
         )
 
         FINAL['phanam'] = FINAL['MaSanPham'].map(
-            df_to_dict(get_ps_df("select masanpham, nhomsp from d_nhom_sp where nhomsp='PHA NAM'"))).fillna('Merap')
+            df_to_dict(pd.read_pickle(path+'d_nhom_sp.df'))).fillna('Merap')
 
         FINAL['thang'] = FINAL['NgayChungTu'] + pd.offsets.Day() - pd.offsets.MonthBegin()
 
@@ -109,9 +110,9 @@ def etl_to_postgres():
 
         bq_values_insert(FINAL, "f_sales", 2)
 
-        pk = ['macongtycn', 'ngaychungtu', 'sodondathang', 'masanpham', 'solo', 'lineref', 'soluong']
+        # pk = ['macongtycn', 'ngaychungtu', 'sodondathang', 'masanpham', 'solo', 'lineref', 'soluong']
 
-        execute_values_upsert(FINAL, 'f_sales', pk=pk)
+        # execute_values_upsert(FINAL, 'f_sales', pk=pk)
     else:
         print('Not now')
 
