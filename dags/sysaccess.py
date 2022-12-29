@@ -86,7 +86,7 @@ def insert_rptrunning():
     LEFT JOIN dbo.SYS_ReportParm cp WITH (NOLOCK) ON cp.ReportNbr=c.ReportNbr
     WHERE r.ReportNbr NOT IN ('OM20890','OM45400','OM32700','IN11500','AR10200','AR10100')
     """
-    df['inserted_at'] = datetime.now()
+    # df['inserted_at'] = datetime.now()
     df = get_ms_df(rp_sql)
     bq_values_insert(df, "d_sync_rptrunning", 2)
 
