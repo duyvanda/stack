@@ -42,9 +42,9 @@ def tonkho_hsd():
 
     # Đọc data
 
-    PXKKVCNB = pd.read_csv(csv_path+f'{prefix1}{name1}/'+f'{datenow}_'+"pr_IN_PXKKVCNB_BI.csv")
-    Transaction = pd.read_csv(csv_path+f'{prefix1}{name1}/'+f'{datenow}_'+"pr_IN_RawdataTransaction_BI.csv")
-    RawdataXNTByLot = pd.read_csv(csv_path+f'{prefix1}{name1}/'+f'{datenow}_'+"pr_IN_RawdataXNTByLot_BI.csv")
+    PXKKVCNB = pd.read_csv(csv_path+f'{prefix1}{name1}/'+f'{datenow}_'+"pr_IN_PXKKVCNB_BI.csv", dayfirst=True)
+    Transaction = pd.read_csv(csv_path+f'{prefix1}{name1}/'+f'{datenow}_'+"pr_IN_RawdataTransaction_BI.csv", dayfirst=True)
+    RawdataXNTByLot = pd.read_csv(csv_path+f'{prefix1}{name1}/'+f'{datenow}_'+"pr_IN_RawdataXNTByLot_BI.csv", dayfirst=True)
     HDD = pd.read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vTlHJ6SB5QNdaHdEaJlRnU7nKcLI2Haj6YlebHtqMvJ-GKsmAZWRvWa5j5dKBY8INF2vSd1fSJlTrXs/pub?gid=0&single=true&output=csv', dayfirst=True, parse_dates=['Ngay(dd/mm/yyyy)'])
 
     # xử lý RawdataXNTByLot
@@ -71,7 +71,8 @@ def tonkho_hsd():
         'masanpham','tensanpham', 'solot',
         'ngayhethan','soluong','makho', 'tenkho', 'tonao', 'datatype'
     ]].copy()
-    Transaction['ngayhethan'] = pd.to_datetime(Transaction['ngayhethan'])
+    Transaction['ngayhethan'] = pd.to_datetime(Transaction['ngayhethan'], dayfirst=True)
+    # Transaction['solot'] = pd.to_numeric(Transaction['solot'])
     Transaction.columns = ['mactycn', 'tenctycn',  'masanpham','tensanpham','solo','ngayhethan','soluong','makho','tenkho','tonao', 'datatype']
 
 
@@ -109,8 +110,10 @@ def tonkho_hsd():
     #xóa data ngày hiện tại
     bq_ex = ''' DELETE FROM biteam.d_sctonkho_hsd WHERE date(inserted_at) = date(current_date); '''
 
-    execute_bq_query(bq_ex)
+    # execute_bq_query(bq_ex)
     #input data mới
+    df['solo'] = pd.to_numeric(df['solo'])
+    df['ngayhethan'] = pd.to_datetime(df['ngayhethan'], dayfirst=True)
 
     bq_values_insert(df,"d_sctonkho_hsd",3)
 
