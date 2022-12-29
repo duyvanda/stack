@@ -90,8 +90,6 @@ def insert_rptrunning():
     df = get_ms_df(rp_sql)
     bq_values_insert(df, "d_sync_rptrunning", 2)
 
-
-
 dummy_start = DummyOperator(task_id="dummy_start", dag=dag)
 
 insert_access = PythonOperator(task_id="insert_access", python_callable=insert_access, dag=dag)
