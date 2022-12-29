@@ -51,7 +51,7 @@ def insert_access():
 
     sql = \
     f"""
-    SELECT a.AccessDate, u.UserName,u.FirstName,sc.ScreenNumber,sc.Descr,a.SessionNumber, a.InternetAddress, a.ComputerName, a.CompanyID
+    SELECT a.AccessDate, u.UserName,u.FirstName,sc.ScreenNumber,sc.Descr,a.SessionNumber, a.InternetAddress, sc.Screentype as ComputerName, a.CompanyID
     FROM dbo.SYS_Access a
     INNER JOIN dbo.Users u ON a.UserId=u.UserName
     and u.UserTypes like '%CS%'
