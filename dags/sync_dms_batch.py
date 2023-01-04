@@ -41,7 +41,7 @@ start_date = '2022-01-01'
 datenow = datetime.now().strftime("%Y-%m-%d")
 datenow_mns1 = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 fdom = datetime.now().replace(day=1).strftime("%Y%m%d")
-datenow_mns90 = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
+datenow_mns90 = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
 date_ms45 = (datetime.now() - timedelta(days=45)).strftime("%Y-%m-%d")
 
 usql = \
@@ -58,6 +58,7 @@ JrnlType,
 Descr,
 TotAmt,
 Status,
+Rlsed,
 Crtd_DateTime,
 Crtd_User,
 LUpd_DateTime,
@@ -133,7 +134,7 @@ def update_sync_dms_ardoc():
         countbq = get_bq_df(statusbq_sql)
         print(countbq)
         dfs = dfs_diff(countbq, countdms)
-        assert dfs.shape[0] == 0, "NO DIFF"
+        assert False, "NO DIFF"
         print("NO DIFF")
     except AssertionError:
         sql = \
@@ -150,6 +151,7 @@ def update_sync_dms_ardoc():
         Descr,
         TotAmt,
         Status,
+        Rlsed,
         Crtd_DateTime,
         Crtd_User,
         LUpd_DateTime,

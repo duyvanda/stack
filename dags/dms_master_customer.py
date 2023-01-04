@@ -34,6 +34,8 @@ dag = DAG(prefix+name,
 )
 
 datenow_min1 = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+datenow_min0 = (datetime.now() - timedelta(days=0)).strftime("%Y-%m-%d")
+
 
 sql = \
 f"""
@@ -161,7 +163,7 @@ def update_customer():
     dk1 = df.shoptype.isin(G_list)
     dk2 = df.custid.isin(G_Cust)
     df['GType'] = np.where(dk1 | dk2,"G", "No-G")
-    df.to_pickle(path+'df.pickle')
+    df.to_pickle(path+datenow_min0+'df.pickle')
 #     df.businessscope = df.businessscope.str.replace('05','1').str.replace('06','2').str.replace('07','3').str.replace('08','4').str.replace('09','5')
 
     

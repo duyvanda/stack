@@ -33,7 +33,7 @@ dag_params = {
 dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
-          schedule_interval= '55 11 * * *',
+          schedule_interval= '55 23 * * *',
           tags=[prefix+name, 'Daily']
 )
 

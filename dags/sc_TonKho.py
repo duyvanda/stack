@@ -203,7 +203,7 @@ def tonkho():
 
     df5[checkdup(df5,2,['masanpham','chinhanh'])].to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF5_Dup.pickle')
 
-    assert checkdup(df5,1,['masanpham','chinhanh']).sum() == 0, "MSP & Chi Nhanh khong duoc trung"
+    assert checkdup(df5,1,['masanpham','chinhanh']).sum() == 0, "MSP & Chi Nhanh khong duoc trung 1"
 
     # df5 = pd.read_csv("22012024_df5.csv")
     # df5.chinhanh.fillna("NA", inplace=True)
@@ -248,7 +248,7 @@ def tonkho():
 
     df5.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'DF5_HDDURL.pickle')
 
-    assert checkdup(df5,1,['masanpham','chinhanh']).sum() == 0, "MSP & Chi Nhanh khong duoc trung"
+    assert checkdup(df5,1,['masanpham','chinhanh']).sum() == 0, "MSP & Chi Nhanh khong duoc trung 2"
 
     NMURLTP = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRvmeMXGwa-2u-cCQmDRyXs__a8oLfcZk9yLyq1LupmdsvzulMVlxHublEJAKszBY-zmnl_Wm1KNnvZ/pub?gid=0&single=true&output=csv'
     nmtp = pd.read_csv(NMURLTP)
