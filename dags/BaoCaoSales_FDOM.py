@@ -43,6 +43,7 @@ datenow = datetime.now().strftime("%Y-%m-%d")
 datenow_mns1 = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 fdom = datetime.now().replace(day=1).strftime("%Y%m%d")
 datenow_mns45 = (datetime.now() - timedelta(days=45)).strftime("%Y-%m-%d")
+datenow_mns45 = '2023-01-01'
 
 def extract_dms():
     print("Success_Extract")

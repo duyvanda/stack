@@ -1556,8 +1556,9 @@ def etl_to_postgres():
     else: print("Not this time then")
 
 def truncate():
-    if datetime.now().hour in {7,8,9,10,11,12,13,14,15,16,17,18,21,23}:
-        commit_psql("truncate table f_tracking_debt cascade;")
+    pass
+    # if datetime.now().hour in {7,8,9,10,11,12,13,14,15,16,17,18,21,23}:
+    #     commit_psql("truncate table f_tracking_debt cascade;")
 
 
 def insert():

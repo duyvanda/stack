@@ -1556,8 +1556,9 @@ def etl_to_postgres():
     else: print("Not this time then")
 
 def truncate():
-    if True:
-        commit_psql("truncate table f_tracking_debt cascade;")
+    pass
+    # if True:
+    #     commit_psql("truncate table f_tracking_debt cascade;")
 
 
 def insert():

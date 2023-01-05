@@ -55,10 +55,10 @@ WHERE t.RowNum=1
 SELECT DISTINCT a.BranchID, 
 BranchName= s.CpnyName,
 a.CustId, 
-RefCustID,
+a.RefCustID,
 --arcic.CustIDInvoice,
 --arci.CustNameInvoice,
-CustName,
+a.CustName,
 Address = CAST ((
                     ISNULL(a.Addr1, '') + CASE ISNULL(a.Addr2, '') WHEN '' THEN '' ELSE ', '+ a.Addr2 END +
                     CASE ISNULL(a.Ward, '') WHEN '' THEN '' ELSE ', ' + ISNULL(w.Name, a.Ward) END +
@@ -77,7 +77,7 @@ DistrictDescr = dt.Name,
 StateDescr = st.Descr,
 TerritoryDescr = t.Descr,
 CustInvoice1.[CustIDInvoice],
-CustInvoice1.CustNameInvoice,
+RTRIM(LTRIM(CustInvoice1.CustNameInvoice)) as CustNameInvoice,
 CustInvoice1.Phone as PhoneInvoice,
 CustInvoice1.Email as EmailInvoice,
     Addr1 =   
@@ -117,6 +117,21 @@ a.BusinessName,
 cast(a.LegalDate as date) as LegalDate,
 tc.Descr as TaxDeclaration,
 act.Descr as StockSales,
+--update 04012023
+a.IsAgency,
+a.AgencyID,
+ac.CustName as AgencyName,
+ss.Descr as SalesSystemDescr,
+a.CheckTerm,
+a.ShoperID,
+a.Addr1 as Streetname,
+ch.Descr as ChannelDescr,
+a.HCOID,
+a.LegalName,
+a.ChargeReceive,
+a.ChargePayment,
+a.ChargePhar,
+--end update 04012023
 arcl.Lat,
 arcl.Lng,
 a.Crtd_Datetime,
@@ -142,6 +157,9 @@ LEFT JOIN SI_Ward as war WITH(NOLOCK)  on  war.Country = CustInvoice1.CountryID 
 LEFT JOIN AR_CustomerLocation as arcl WITH(NOLOCK)  on  arcl.CustID = a.CustID AND arcl.BranchID = a.BranchID
 LEFT JOIN dbo.AR_TaxDeclaration tc ON a.TaxDeclaration=tc.Code
 LEFT JOIN dbo.AR_StockSales act ON act.Code=a.StockSales
+LEFT JOIN dbo.AR_Customer ac WITH (NOLOCK) ON ac.CustId = a.AgencyID
+LEFT JOIN dbo.SYS_SalesSystem ss WITH (NOLOCK) ON a.SalesSystem = ss.Code
+LEFT JOIN dbo.AR_Channel ch WITH (NOLOCK) ON ch.Code = a.Channel
 """
 
 # print(sql)
@@ -163,12 +181,13 @@ def update_customer():
     dk1 = df.shoptype.isin(G_list)
     dk2 = df.custid.isin(G_Cust)
     df['GType'] = np.where(dk1 | dk2,"G", "No-G")
+    # df['custnameinvoice'] = df['custnameinvoice'].str.strip()
     df.to_pickle(path+datenow_min0+'df.pickle')
 #     df.businessscope = df.businessscope.str.replace('05','1').str.replace('06','2').str.replace('07','3').str.replace('08','4').str.replace('09','5')
 
     
 def insert():
-    df = pd.read_pickle(path+'df.pickle')
+    df = pd.read_pickle(path+datenow_min0+'df.pickle')
     try:
         print("data shape", df.shape)
         assert df.shape[0] >0

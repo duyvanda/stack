@@ -42,7 +42,7 @@ def extract_dms():
     print("Success_Extract")
 
 def etl_to_postgres():
-    day_ago = 6
+    day_ago = 4
     datenow = datetime.now().strftime("%Y-%m-%d")
     datenow_day_ago = ( datetime.now()-timedelta(day_ago) ).strftime("%Y-%m-%d")
     # param_1 = f"'{datenow_day_ago}'"
