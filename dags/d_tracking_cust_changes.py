@@ -268,7 +268,7 @@ def insert():
     when new_value is null then "Unknow"  else new_value end as new_value,
     changetype
     from biteam.d_master_custhis
-    UNPIVOT (new_value for changetype in (branchid, salessystem, channel, shoptype, hcoid, hcotype, classid, checkterm, custname, addr1, attn, country, district, emailaddr, fax, phone, slsperid, state, status, terms, territory, zip, establishdate, refcustid, inactive, ward, businessname, market, billmarket, oricustid, generalcustid, paymentsform, genorders, batchexpform, custidpublic, shoperid, isagency, agencyid, taxdeclaration, stocksales, businessscope, legalname, legaldate, chargereceive, chargepayment, chargephar))
+    UNPIVOT (new_value for changetype in (branchid, salessystem, channel, shoptype, hcoid, hcotype, classid, checkterm, custname, addr1, attn, country, district, emailaddr, fax, phone, slsperid, state, status, terms, territory, zip, establishdate, refcustid, inactive, ward, businessname, market, billmarket, oricustid, generalcustid, paymentsform, genorders, batchexpform, custidpublic, shoperid, isagency, agencyid, taxdeclaration, stocksales, businessscope, legalname, legaldate, chargereceive, chargepayment, chargephar, taxregnbr))
     where date(lupd_datetime) = CHANGED_DATE and version_id > 1
     -- and custid = '001733'
 
@@ -286,7 +286,7 @@ def insert():
     when old_value is null then "Unknow"  else old_value end as old_value,
     changetype
     from biteam.d_master_custhis
-    UNPIVOT (old_value for changetype in (branchid, salessystem, channel, shoptype, hcoid, hcotype, classid, checkterm, custname, addr1, attn, country, district, emailaddr, fax, phone, slsperid, state, status, terms, territory, zip, establishdate, refcustid, inactive, ward, businessname, market, billmarket, oricustid, generalcustid, paymentsform, genorders, batchexpform, custidpublic, shoperid, isagency, agencyid, taxdeclaration, stocksales, businessscope, legalname, legaldate, chargereceive, chargepayment, chargephar))
+    UNPIVOT (old_value for changetype in (branchid, salessystem, channel, shoptype, hcoid, hcotype, classid, checkterm, custname, addr1, attn, country, district, emailaddr, fax, phone, slsperid, state, status, terms, territory, zip, establishdate, refcustid, inactive, ward, businessname, market, billmarket, oricustid, generalcustid, paymentsform, genorders, batchexpform, custidpublic, shoperid, isagency, agencyid, taxdeclaration, stocksales, businessscope, legalname, legaldate, chargereceive, chargepayment, chargephar,taxregnbr))
     -- where custid = '001733'
     )
 
