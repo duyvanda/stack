@@ -33,7 +33,7 @@ dag = DAG(prefix+name,
           catchup=False,
           default_args=dag_params,
           schedule_interval= '@daily',
-          tags=[prefix+name, 'Daily']
+          tags=[prefix+name, 'Daily', 'hanhdt']
 )
 datenow_1day_ago = ( datetime.now()-timedelta(1) ).strftime("%Y-%m-%d")
 
