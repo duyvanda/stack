@@ -42,18 +42,31 @@ def insert():
     #start
     sql = \
     f"""
+    With #InvoiceCount as
+    (
+    SELECT * FROM
+    (
+    SELECT custInvoice.CustID, Invoice.TaxID, ROW_NUMBER()
+    OVER (PARTITION BY CustID ORDER BY (SELECT NULL)) AS RowNum
+    FROM    AR_Customer_InvoiceCustomer custInvoice WITH(NOLOCK) 
+    INNER JOIN AR_CustomerInvoice Invoice WITH(NOLOCK) ON Invoice.CustIDInvoice = custInvoice.CustIDInvoice  
+    where Active = 1
+    ) t
+    WHERE t.RowNum=1
+    )
+
     select
     ch.Version,
     1 as version_id,
     ch.CustID,
     ch.BranchID,
-    ch.SalesSystem,
+    isnull(ss.Descr, 'UnKnow') as SalesSystem,
     ch.Channel,
     ch.ShopType,
     ch.HCOID,
     ch.HCOType,
     isnull(ch.ClassID, 'UnKnow') as ClassID,
-    ch.CheckTerm,
+    CheckTerm = CASE ch.CheckTerm WHEN N'N' THEN N'Không Kiểm Tra' WHEN N'D' THEN N'Kiểm Tra Nợ Quá Hạn' ELSE 'UnKnow' END,
     ch.LUpd_Datetime,
     ch.LUpd_User,
     cust.Crtd_Datetime,
@@ -61,41 +74,51 @@ def insert():
     isnull(ch.CustName, 'UnKnow') as CustName,
     isnull(ch.Addr1, 'UnKnow') as Addr1,
     isnull(ch.Attn, 'UnKnow') as Attn,
-    isnull(ch.Country, 'UnKnow') as Country,
-    isnull(ch.District, 'UnKnow') as District,
+    isnull(cou.Descr, 'UnKnow') as Country,
+    isnull(si.Descr, 'UnKnow') as State,
+    isnull(di.Name, 'UnKnow') as District,
+    isnull(w.name, 'UnKnow') as Ward,
     isnull(ch.EMailAddr, 'UnKnow') as EMailAddr,
     isnull(ch.Fax, 'UnKnow') as Fax,
     isnull(ch.Phone, 'UnKnow') as Phone,
     isnull(ch.SlsperId, 'UnKnow') as SlsperId,
-    isnull(ch.State, 'UnKnow') as State,
-    isnull(ch.Status, 'UnKnow') as Status,
+    --isnull(ch.Status, 'UnKnow') as Status,
+    Status = CASE
+                WHEN ch.Status = 'A' THEN
+                    N'Đang Hoạt Động'
+                WHEN ch.Status = 'I' THEN
+                    N'Ngưng Hoạt Động'
+                WHEN ch.Status = 'H' THEN
+                    N'Chờ Xử Lý'
+                ELSE 'UnKnow'
+            END,
     isnull(ch.Terms, 'UnKnow') as Terms,
-    isnull(ch.Territory, 'UnKnow') as Territory,
+    isnull(t.Descr, 'UnKnow') as Territory,
     isnull(ch.Zip, 'UnKnow') as Zip,
     ISNULL(convert(varchar,ch.EstablishDate,23 ),'1900-01-01') as EstablishDate,
     isnull(ch.RefCustID, 'UnKnow') as RefCustID,
     isnull(ch.InActive, 'UnKnow') as InActive,
-    isnull(ch.Ward, 'UnKnow') as Ward,
     isnull(ch.BusinessName, 'UnKnow') as BusinessName,
     isnull(ch.Market, 'UnKnow') as Market,
     isnull(ch.BillMarket, 'UnKnow') as BillMarket,
     isnull(ch.OriCustID, 'UnKnow') as OriCustID,
     isnull(ch.GeneralCustID, 'UnKnow') as GeneralCustID,
-    isnull(ch.PaymentsForm, 'UnKnow') as PaymentsForm,
-    isnull(ch.GenOrders, 'UnKnow') as GenOrders,
-    isnull(ch.BatchExpForm, 'UnKnow') as BatchExpForm,
+    isnull(pay.Descr, 'UnKnow') as PaymentsForm,
+    isnull(mag.Descr, 'UnKnow') as GenOrders,
+    isnull(ex.Descr, 'UnKnow') as BatchExpForm,
     isnull(ch.CustIdPublic, 'UnKnow') as CustIdPublic,
     isnull(ch.ShoperID, 'UnKnow') as ShoperID,
     isnull(cast (ch.IsAgency as nvarchar), 'UnKnow') as IsAgency,
     isnull(ch.AgencyID, 'UnKnow') as AgencyID,
-    isnull(ch.TaxDeclaration, 'UnKnow') as TaxDeclaration,
-    isnull(ch.StockSales, 'UnKnow') as StockSales,
+    isnull(tc.Descr, 'UnKnow') as TaxDeclaration,
+    isnull(act.Descr, 'UnKnow') as StockSales,
     isnull(ch.BusinessScope, 'UnKnow') as BusinessScope,
     isnull(ch.LegalName, 'UnKnow') as LegalName,
     ISNULL(convert(varchar,ch.LegalDate,23 ),'1900-01-01') as LegalDate,
     isnull(ch.ChargeReceive, 'UnKnow') as ChargeReceive,
     isnull(ch.ChargePayment, 'UnKnow') as ChargePayment,
     isnull(ch.ChargePhar, 'UnKnow') as ChargePhar,
+    cast (CustInvoice1.TaxID as nvarchar) as TaxRegNbr,
     YEAR(cust.Crtd_Datetime) as Year_Created,
     YEAR(ch.LUpd_Datetime) as Year_Updated,
     ch.Addr2, --NO
@@ -136,7 +159,6 @@ def insert():
     ch.TaxID02,--NO
     ch.TaxID03,--NO
     ch.TaxLocId,--NO
-    ch.TaxRegNbr,--NO
     ch.TradeDisc,--NO
     ch.Location,--NO
     ch.Area,--NO
@@ -173,6 +195,26 @@ def insert():
     ch.Account--NO
     from AR_HistoryCustClassID ch
     INNER JOIN dbo.AR_Customer cust WITH (NOLOCK) ON ch.CustID=cust.CustId
+    LEFT JOIN dbo.AR_MasterAutoGenOrder mag WITH (NOLOCK)
+    ON ch.GenOrders = mag.Code
+    LEFT JOIN dbo.AR_MasterBatchExpForm ex WITH (NOLOCK)
+    ON ch.BatchExpForm = ex.Code
+    LEFT JOIN dbo.SI_District di WITH (NOLOCK)
+    ON ch.District = di.District
+    AND ch.State = di.State
+    LEFT JOIN dbo.SI_Ward w WITH (NOLOCK)
+    ON w.Ward = ch.Ward
+    AND w.State = ch.State
+    AND w.District = ch.District
+    LEFT JOIN dbo.SI_State si WITH (NOLOCK)
+    ON si.State = ch.State
+    LEFT JOIN SI_Country cou WITH(NOLOCK) ON cou.CountryID = ch.Country
+    LEFT JOIN SI_Territory t WITH(NOLOCK) ON t.Territory = ch.Territory
+    LEFT JOIN dbo.AR_TaxDeclaration tc ON ch.TaxDeclaration=tc.Code
+    LEFT JOIN dbo.AR_StockSales act ON act.Code=ch.StockSales
+    LEFT JOIN AR_MasterPayments pay WITH(NOLOCK) ON pay.Code = ch.PaymentsForm
+    LEFT JOIN dbo.SYS_SalesSystem ss WITH (NOLOCK) ON ch.SalesSystem = ss.Code
+    LEFT JOIN #InvoiceCount  CustInvoice1 WITH(NOLOCK) ON CustInvoice1.CustID = ch.CustId 
     where cast(ch.LUpd_Datetime as date) = '{datenow_1day_ago}' order by LUpd_Datetime asc
     """
     print("sql is",sql)
@@ -203,7 +245,7 @@ def insert():
     df2.slsperid = df2.slsperid.astype('str')
     df2['version_id'] = df2['version_id'].astype(np.int64)
     # df.legaldate = df.legaldate.astype('str')
-    df2['version_id'] = df2['version_id'].astype(np.int64)
+    # df2['version_id'] = df2['version_id'].astype(np.int64)
     # df2.dtypes
     bq_values_insert(df2, "d_master_custhis", 2)
     print("inserted to d_master_custhis")
