@@ -15,7 +15,7 @@ local_tz = pendulum.timezone("Asia/Bangkok")
 
 name='BaoCaoSales_FDOM'
 prefix='Sales'
-csv_path = '/home/biserver/data_lake/'+prefix+name+'/'
+csv_path = '/usr/local/airflow/plugins/Sales_BaoCaoSales_FDOM/'
 path = '/usr/local/airflow/dags/files/'
 
 dag_params = {
@@ -126,6 +126,12 @@ def etl_to_postgres():
 
         datenow_ = datetime.now().strftime("%Y-%m-%d")
 
+        pk = ['macongtycn', 'ngaychungtu', 'sodondathang', 'mahd', 'masanpham', 'solo', 'lineref', 'soluong']
+
+        FINAL.columns = lower_col(FINAL)
+        
+        assert FINAL[checkdup(FINAL, 2, subset=pk)].shape[0] == 0, "DF has duplicates"
+
         sql =\
         f"""
         DELETE FROM biteam.f_sales where DATE(ngaychungtu)>='{datenow_mns45}'
@@ -134,9 +140,11 @@ def etl_to_postgres():
 
         bq_values_insert(FINAL, "f_sales", 2)
 
-        pk = ['macongtycn', 'ngaychungtu', 'sodondathang', 'masanpham', 'solo', 'lineref', 'soluong']
 
-        execute_values_upsert(FINAL, 'f_sales', pk=pk)
+        # FINAL.to_pickle(csv_path+"file.pk")
+
+
+        # execute_values_upsert(FINAL, 'f_sales', pk=pk)
     else:
         print('Not now')
 

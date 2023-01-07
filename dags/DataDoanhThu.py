@@ -778,6 +778,8 @@ def etl_to_postgres():
 
         TOrder = union_all([UNION1,UNION2,UNION3,UNION4,UNION5,UNION6,UNION7])
 
+        TOrder.to_pickle(csv_path+f'{prefix}{name}/'+f'{datenow}_'+'Torder.pk')
+
         # TOrder.shape
 
         lst = ['BranchID','OrderNbr','OMOrder','PaymentsForm','TermsID','CustID','InvoiceCustID','Version']
@@ -790,7 +792,25 @@ def etl_to_postgres():
 
         # vc(TCustomer, 'PaymentsForm')
 
-        c_sql = \
+        # c_sql = \
+        # """
+        # SELECT 
+        # CustId as CustID,
+        # CustName,
+        # Channel,
+        # ShopType,
+        # Territory,
+        # Addr1,
+        # Ward,
+        # District,
+        # State,
+        # Attn,
+        # Phone
+        # from AR_Customer
+        # """
+        # c = get_ms_df(c_sql)
+
+        cl_sql = \
         """
         SELECT 
         CustId as CustID,
@@ -806,37 +826,19 @@ def etl_to_postgres():
         Phone
         from AR_Customer
         """
-        c = get_ms_df(c_sql)
-
-        cl_sql = \
-        """
-        SELECT 
-        Version,
-        CustName,
-        Channel,
-        ShopType,
-        Territory,
-        Addr1,
-        Ward,
-        District,
-        State,
-        Attn,
-        Phone
-        from AR_HistoryCustClassID
-        """
         cl = get_ms_df(cl_sql)
 
         # TCustomer.shape
 
         # cl.columns
 
-        TCustomer1 = TCustomer.merge(cl, how = 'left', on=['Version'])
+        TCustomer1 = TCustomer.merge(cl, how = 'inner', on=['CustID'])
 
         # TCustomer1.shape
 
         lst = TCustomer1.columns
 
-        TCustomer2 = TCustomer1.merge(c, how = 'inner', on=['CustID'], suffixes=['','_c'])
+        TCustomer2 = TCustomer1.merge(cl, how = 'inner', on=['CustID'], suffixes=['','_c'])
 
         TCustomer2.CustName.fillna(TCustomer2.CustName_c, inplace=True)
 
@@ -1582,11 +1584,11 @@ def insert():
         
         print("debug1")
         df2.columns = lower_col(df2)
-        dk1 = df2.subchannel.isin(["NT","PK","SI"])
+        dk1 = df2.subchannel.isin(["NT","PK","SI","SI23","PCL","CTD","PMC"])
         dk2 = df2.paymentsform == "TM"
         # dka = df2.terms.isin( ["Gối Đầu 30 Pha Nam","Thu tiền ngay không có VP PN","Thu tiền ngay có VP PN","Gối 1 Đơn Hàng (trong 30 ngày)"] )
         dkfinal1 = dk1&dk2
-        dk3 = df2.subchannel == 'CHUOI'
+        dk3 = df2.subchannel.isin(["CHUOI","NTC","CCD","ECOM"])
         dk4 = df2.termstype == "Thanh Toán Ngay"
         dk5 = df2.paymentsform == "TM"
         dkfinal2 = dk3&dk4&dk5
@@ -1595,21 +1597,21 @@ def insert():
             np.where(dk6, "INS", "CS"))
         # *------------------*
         print("debug2")
-        dk1 = df2.ordernbr == 'DH122018-17643'
-        dk2 = df2.branchid == 'MR0001'
-        df2.debtincharge_v2 = np.where(dk1&dk2, "CS", df2.debtincharge_v2)
+        # dk1 = df2.ordernbr == 'DH122018-17643'
+        # dk2 = df2.branchid == 'MR0001'
+        # df2.debtincharge_v2 = np.where(dk1&dk2, "CS", df2.debtincharge_v2)
         # *------------------*
 
         #update Hanh input
-        dk1 = df2.ordernbr == 'DH062018-13754'
-        dk2 = df2.branchid == 'MR0003'
-        df2.debtincharge_v2 = np.where(dk1&dk2, "CS", df2.debtincharge_v2)
+        # dk1 = df2.ordernbr == 'DH062018-13754'
+        # dk2 = df2.branchid == 'MR0003'                                                                                                                                                                                                                                                                                                                                                                                
+        # df2.debtincharge_v2 = np.where(dk1&dk2, "CS", df2.debtincharge_v2)
         #
 
         #update don sai => Moving sang type error
-        dk1 = df2.ordernbr == 'DH6-1222-00080'
-        dk2 = df2.branchid == 'MR0016'
-        df2.debtincharge_v2 = np.where(dk1&dk2, "ERROR", df2.debtincharge_v2)
+        # dk1 = df2.ordernbr == 'DH6-1222-00080'
+        # dk2 = df2.branchid == 'MR0016'
+        # df2.debtincharge_v2 = np.where(dk1&dk2, "ERROR", df2.debtincharge_v2)
 
         df2['inserted_at'] = datetime.now()
         # BQ first 
