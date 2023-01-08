@@ -240,7 +240,8 @@ def update_sync_dms_ib():
         Crtd_DateTime,
         Crtd_Prog,
         Crtd_User,
-        LUpd_DateTime
+        LUpd_DateTime,
+        ISNULL(ApproveDate, LUpd_DateTime) as ApproveDate
         from {from_tb}
         where CAST(Crtd_Datetime as DATE) >= @from
         """
@@ -288,18 +289,39 @@ def update_sync_dms_dv():
         DECLARE @from DATE = '{datenow_mns45}'
         DECLARE @to DATE = '2022-01-31'
         SELECT
-        CONCAT(BranchID,BatNbr,OrderNbr,Sequence) as pk,
-        BranchID,
-        BatNbr,
-        OrderNbr,
-        Sequence,
-        SlsperID,
-        Status,
-        Crtd_DateTime,
-        Crtd_Prog,
-        Crtd_User,
-        LUpd_DateTime
-        from {from_tb}
+        CONCAT(a.BranchID,a.BatNbr,a.OrderNbr,a.Sequence) as pk,
+        a.BranchID,
+        a.BatNbr,
+        a.OrderNbr,
+        a.Sequence,
+        a.SlsperID,
+        a.Status,
+        a.Crtd_DateTime,
+        a.Crtd_Prog,
+        a.Crtd_User,
+        a.LUpd_DateTime,
+        b.LUpd_DateTime as Delivery_Date
+        from {from_tb} a
+        LEFT JOIN
+        (
+        select * from 
+        (
+            select
+            DISTINCT
+            Status,
+            BranchID,
+            BatNbr,
+            OrderNbr,
+            LUpd_DateTime,
+            ROW_NUMBER() OVER (PARTITION BY Status,BranchID,BatNbr,OrderNbr  ORDER BY LUpd_DateTime DESC ) AS RowNum
+            FROM OM_DeliHistory
+            where Status = 'C'
+        ) #a
+        where RowNum = 1
+        ) b
+        ON a.BranchID = b.BranchID
+        AND a.BatNbr = b.BatNbr
+        AND a.OrderNbr = b.OrderNbr
         where CAST(Crtd_Datetime as DATE) >= @from
         """
         df = get_ms_df(sql)

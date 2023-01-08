@@ -56,7 +56,8 @@ Printed,
 Crtd_DateTime,
 Crtd_Prog,
 Crtd_User,
-LUpd_DateTime
+LUpd_DateTime,
+ISNULL(ApproveDate, LUpd_DateTime) as ApproveDate
 from {from_tb}
 where cast(LUpd_DateTime as DATE) >= @from
 """

@@ -48,20 +48,41 @@ f"""
 DECLARE @from DATE = '{datenow}'
 DECLARE @to DATE = '2022-01-01'
 SELECT
-CONCAT(BranchID,BatNbr,OrderNbr,Sequence) as pk,
-BranchID,
-BatNbr,
-OrderNbr,
-Sequence,
-SlsperID,
-Status,
-Crtd_DateTime,
-Crtd_Prog,
-Crtd_User,
-LUpd_DateTime
-from {from_tb}
-where cast(LUpd_DateTime as DATE) >= @from
-and cast(Crtd_DateTime as DATE) >= @to
+CONCAT(a.BranchID,a.BatNbr,a.OrderNbr,a.Sequence) as pk,
+a.BranchID,
+a.BatNbr,
+a.OrderNbr,
+a.Sequence,
+a.SlsperID,
+a.Status,
+a.Crtd_DateTime,
+a.Crtd_Prog,
+a.Crtd_User,
+a.LUpd_DateTime,
+b.LUpd_DateTime as Delivery_Date
+from {from_tb} a
+LEFT JOIN
+(
+select * from 
+(
+	select
+	DISTINCT
+	Status,
+	BranchID,
+	BatNbr,
+	OrderNbr,
+	LUpd_DateTime,
+	ROW_NUMBER() OVER (PARTITION BY Status,BranchID,BatNbr,OrderNbr  ORDER BY LUpd_DateTime DESC ) AS RowNum
+	FROM OM_DeliHistory
+	where Status = 'C'
+) #a
+where RowNum = 1
+) b
+ON a.BranchID = b.BranchID
+AND a.BatNbr = b.BatNbr
+AND a.OrderNbr = b.OrderNbr
+where cast(a.LUpd_DateTime as DATE) >= @from
+and cast(a.Crtd_DateTime as DATE) >= @to
 """
 
 table_name = "sync_dms_dv"
