@@ -66,11 +66,11 @@ Address = CAST ((
                     CASE ISNULL(a.State, '') WHEN '' THEN '' ELSE ', '+ ISNULL(st.Descr, a.State) END + 
                     CASE ISNULL(a.Country, '') WHEN '' THEN '' ELSE ', '+ ISNULL(cou.Descr, a.Country) END
                     ) AS NVARCHAR(MAX)),
-a.District as DistrictCode,
-a.State as StateCode,
-a.Ward as WardCode,
+case when a.District = CHAR(32) then NULL else a.District end as DistrictCode,
+case when a.State = CHAR(32) then NULL else a.State end as StateCode,
+case when a.Ward = CHAR(32) then NULL else a.Ward end as WardCode,
 a.Country as CountryCode,
-a.Territory as TerritoryCode,
+case when a.Territory = 'HCM' then NULL else a.Territory end as TerritoryCode,
 a.SalesSystem,
 w.Name as WardName,
 DistrictDescr = dt.Name,

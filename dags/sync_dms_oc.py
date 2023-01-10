@@ -6,6 +6,8 @@ import pendulum
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
+from airflow.models.taskinstance import _CURRENT_CONTEXT as context
+# from airflow.operators.python import get_current_context
 
 local_tz = pendulum.timezone("Asia/Bangkok")
 
@@ -70,8 +72,18 @@ where cast(oc.VisitDate as DATE) >= @from
 
 def insert():
     print(sql)
+    # context = get_current_context()
+    dag_start_date = context[-1]['dag_run'].start_date.strftime("%Y%m%d%H%M")
+    print(dag_start_date)
+
+    # dd = str(dag_start_date.day).zfill(2)
+    # mm = str(dag_start_date.month).zfill(2)
+    # yyyy = str(dag_start_date.year)
+    # hh = str(dag_start_date.hour).zfill(2)
+    # hh = str(dag_start_date.m).zfill(2)
 
 def update():
+    dag_start_date = context[-1]['dag_run'].start_date.strftime("%Y%m%d%H%M")
 
     df = get_ms_df(sql)
     print("df shape", df.shape)
@@ -87,8 +99,8 @@ def update():
         bq_values_insert(df, f"{table_name}", 2)
 
         # create file sensor
-        with open(csv_path+f'FILESENSOR/{prefix+name}.txt','w') as f:
-            f.close()
+        fs = pd.DataFrame().to_pickle(csv_path+f'FILESENSOR/{prefix+name}.txt')
+
     except AssertionError:
         print("No new data")
 

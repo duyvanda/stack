@@ -244,6 +244,7 @@ def insert():
     df2.isagency = df2.isagency.astype('str')
     df2.slsperid = df2.slsperid.astype('str')
     df2['version_id'] = df2['version_id'].astype(np.int64)
+    df2['todate'] = pd.to_datetime(df2['todate'])
     # df.legaldate = df.legaldate.astype('str')
     # df2['version_id'] = df2['version_id'].astype(np.int64)
     # df2.dtypes

@@ -53,6 +53,10 @@ def extract_dms():
     ETC_WorkingPlan = get_ms_df(f"""exec [pr_ETC_WorkingPlan_BI] '{fdom}', '{ldom}' """)
     ETC_WorkingResult.to_pickle("ETC_WorkingResult.pk")
     ETC_WorkingPlan.to_pickle("ETC_WorkingPlan.pk")
+    print("my", my)
+    print("fdom", fdom)
+    print("ldom", ldom)
+    
 
 
 def insert():
@@ -64,6 +68,8 @@ def insert():
     ETC_WorkingResult['inserted_at'] = datetime.now()
     execute_bq_query(f""" DELETE FROM `spatial-vision-343005.biteam.sync_dms_etc_workingresult` where my = '{my}' """)
     bq_values_insert(ETC_WorkingResult, "sync_dms_etc_workingresult", 2)
+
+    print("Done results")
     
     ETC_WorkingPlan['my'] = str(m) + str(y)
     ETC_WorkingPlan['inserted_at'] = datetime.now()
